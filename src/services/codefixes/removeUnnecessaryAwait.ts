@@ -1,5 +1,10 @@
 import {
-    AwaitKeywordToken,
+    codeFixAll,
+    createCodeFixAction,
+    registerCodeFix,
+} from "../_namespaces/ts.codefix.js";
+import {
+    AwaitKeyword,
     Diagnostics,
     findPrecedingToken,
     getLeftmostExpression,
@@ -13,12 +18,7 @@ import {
     textChanges,
     TextSpan,
     tryCast,
-} from "../_namespaces/ts";
-import {
-    codeFixAll,
-    createCodeFixAction,
-    registerCodeFix,
-} from "../_namespaces/ts.codefix";
+} from "../_namespaces/ts.js";
 
 const fixId = "removeUnnecessaryAwait";
 const errorCodes = [
@@ -40,7 +40,7 @@ registerCodeFix({
 });
 
 function makeChange(changeTracker: textChanges.ChangeTracker, sourceFile: SourceFile, span: TextSpan) {
-    const awaitKeyword = tryCast(getTokenAtPosition(sourceFile, span.start), (node): node is AwaitKeywordToken => node.kind === SyntaxKind.AwaitKeyword);
+    const awaitKeyword = tryCast(getTokenAtPosition(sourceFile, span.start), (node): node is AwaitKeyword => node.kind === SyntaxKind.AwaitKeyword);
     const awaitExpression = awaitKeyword && tryCast(awaitKeyword.parent, isAwaitExpression);
     if (!awaitExpression) {
         return;

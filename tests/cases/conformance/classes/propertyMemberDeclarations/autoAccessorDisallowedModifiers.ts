@@ -1,4 +1,4 @@
-// @target: esnext
+// @target: esnext,es2017
 // @noTypesAndSymbols: true
 
 abstract class C1 {
@@ -15,6 +15,8 @@ abstract class C1 {
     accessor set k(v: any) {}
     accessor constructor() {}
     accessor l?: any;
+    accessor readonly m: any;
+    accessor declare n: any;
 }
 
 class C2 extends C1 {

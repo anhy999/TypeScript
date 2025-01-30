@@ -1,18 +1,15 @@
-Info 0    [00:00:21.000] Provided types map file "/a/lib/typesMap.json" doesn't exist
-Info 1    [00:00:22.000] request:
-    {
-      "command": "open",
-      "arguments": {
-        "file": "/user/username/projects/myproject/a.ts"
-      },
-      "seq": 1,
-      "type": "request"
-    }
+Info seq  [hh:mm:ss:mss] currentDirectory:: /home/src/Vscode/Projects/bin useCaseSensitiveFileNames:: false
+Info seq  [hh:mm:ss:mss] libs Location:: /home/src/tslibs/TS/Lib
+Info seq  [hh:mm:ss:mss] globalTypingsCacheLocation:: /home/src/Library/Caches/typescript
+Info seq  [hh:mm:ss:mss] Provided types map file "/home/src/tslibs/TS/Lib/typesMap.json" doesn't exist
 Before request
 //// [/user/username/projects/myproject/a.ts]
 if (a < (b + c) { }
 
-//// [/a/lib/lib.d.ts]
+//// [/user/username/projects/myproject/tsconfig.json]
+{}
+
+//// [/home/src/tslibs/TS/Lib/lib.d.ts]
 /// <reference no-default-lib="true"/>
 interface Boolean {}
 interface Function {}
@@ -24,51 +21,73 @@ interface Object {}
 interface RegExp {}
 interface String { charAt: any; }
 interface Array<T> { length: number; [n: number]: T; }
-
-//// [/user/username/projects/myproject/tsconfig.json]
-{}
-
-
-PolledWatches::
-
-FsWatches::
-
-FsWatchesRecursive::
-
-Info 2    [00:00:23.000] Starting updateGraphWorker: Project: /dev/null/inferredProject1*
-Info 3    [00:00:24.000] Finishing updateGraphWorker: Project: /dev/null/inferredProject1* Version: 1 structureChanged: true structureIsReused:: Not Elapsed:: *ms
-Info 4    [00:00:25.000] Project '/dev/null/inferredProject1*' (Inferred)
-Info 5    [00:00:26.000] 	Files (2)
-	/a/lib/lib.d.ts
-	/user/username/projects/myproject/a.ts
+interface ReadonlyArray<T> {}
+declare const console: { log(msg: any): void; };
 
 
-	a/lib/lib.d.ts
+Info seq  [hh:mm:ss:mss] request:
+    {
+      "command": "open",
+      "arguments": {
+        "file": "/user/username/projects/myproject/a.ts"
+      },
+      "seq": 1,
+      "type": "request"
+    }
+Info seq  [hh:mm:ss:mss] Creating InferredProject: /dev/null/inferredProject1*, currentDirectory: /home/src/Vscode/Projects/bin
+Info seq  [hh:mm:ss:mss] Starting updateGraphWorker: Project: /dev/null/inferredProject1*
+Info seq  [hh:mm:ss:mss] Finishing updateGraphWorker: Project: /dev/null/inferredProject1* projectStateVersion: 1 projectProgramVersion: 0 structureChanged: true structureIsReused:: Not Elapsed:: *ms
+Info seq  [hh:mm:ss:mss] Project '/dev/null/inferredProject1*' (Inferred)
+Info seq  [hh:mm:ss:mss] 	Files (2)
+	/home/src/tslibs/TS/Lib/lib.d.ts Text-1 "/// <reference no-default-lib=\"true\"/>\ninterface Boolean {}\ninterface Function {}\ninterface CallableFunction {}\ninterface NewableFunction {}\ninterface IArguments {}\ninterface Number { toExponential: any; }\ninterface Object {}\ninterface RegExp {}\ninterface String { charAt: any; }\ninterface Array<T> { length: number; [n: number]: T; }\ninterface ReadonlyArray<T> {}\ndeclare const console: { log(msg: any): void; };"
+	/user/username/projects/myproject/a.ts SVC-1-0 "if (a < (b + c) { }"
+
+
+	../../../tslibs/TS/Lib/lib.d.ts
 	  Default library for target 'es5'
-	user/username/projects/myproject/a.ts
+	../../../../../user/username/projects/myproject/a.ts
 	  Root file specified for compilation
 
-Info 6    [00:00:27.000] -----------------------------------------------
-Info 7    [00:00:28.000] Project '/dev/null/inferredProject1*' (Inferred)
-Info 7    [00:00:29.000] 	Files (2)
+Info seq  [hh:mm:ss:mss] -----------------------------------------------
+Info seq  [hh:mm:ss:mss] Project '/dev/null/inferredProject1*' (Inferred)
+Info seq  [hh:mm:ss:mss] 	Files (2)
 
-Info 7    [00:00:30.000] -----------------------------------------------
-Info 7    [00:00:31.000] Open files: 
-Info 7    [00:00:32.000] 	FileName: /user/username/projects/myproject/a.ts ProjectRootPath: undefined
-Info 7    [00:00:33.000] 		Projects: /dev/null/inferredProject1*
+Info seq  [hh:mm:ss:mss] -----------------------------------------------
+Info seq  [hh:mm:ss:mss] Open files: 
+Info seq  [hh:mm:ss:mss] 	FileName: /user/username/projects/myproject/a.ts ProjectRootPath: undefined
+Info seq  [hh:mm:ss:mss] 		Projects: /dev/null/inferredProject1*
+Info seq  [hh:mm:ss:mss] response:
+    {
+      "seq": 0,
+      "type": "response",
+      "command": "open",
+      "request_seq": 1,
+      "success": true,
+      "performanceData": {
+        "updateGraphDurationMs": *
+      }
+    }
 After request
 
-PolledWatches::
+Projects::
+/dev/null/inferredProject1* (Inferred) *new*
+    projectStateVersion: 1
+    projectProgramVersion: 1
+    autoImportProviderHost: false
 
-FsWatches::
+ScriptInfos::
+/home/src/tslibs/TS/Lib/lib.d.ts *new*
+    version: Text-1
+    containingProjects: 1
+        /dev/null/inferredProject1*
+/user/username/projects/myproject/a.ts (Open) *new*
+    version: SVC-1-0
+    containingProjects: 1
+        /dev/null/inferredProject1* *default*
 
-FsWatchesRecursive::
+Before request
 
-Info 7    [00:00:34.000] response:
-    {
-      "responseRequired": false
-    }
-Info 8    [00:00:35.000] request:
+Info seq  [hh:mm:ss:mss] request:
     {
       "type": "request",
       "seq": 2,
@@ -77,23 +96,7 @@ Info 8    [00:00:35.000] request:
         "file": "/user/username/projects/myproject/a.ts"
       }
     }
-Before request
-
-PolledWatches::
-
-FsWatches::
-
-FsWatchesRecursive::
-
-After request
-
-PolledWatches::
-
-FsWatches::
-
-FsWatchesRecursive::
-
-Info 9    [00:00:36.000] response:
+Info seq  [hh:mm:ss:mss] response:
     {
       "response": [
         {
@@ -130,7 +133,11 @@ Info 9    [00:00:36.000] response:
       ],
       "responseRequired": true
     }
-Info 10   [00:00:37.000] request:
+After request
+
+Before request
+
+Info seq  [hh:mm:ss:mss] request:
     {
       "command": "geterr",
       "arguments": {
@@ -142,40 +149,71 @@ Info 10   [00:00:37.000] request:
       "seq": 3,
       "type": "request"
     }
-Before request
-
-PolledWatches::
-
-FsWatches::
-
-FsWatchesRecursive::
-
 After request
 
-PolledWatches::
+Timeout callback:: count: 1
+1: checkOne *new*
 
-FsWatches::
+Before running Timeout callback:: count: 1
+1: checkOne
 
-FsWatchesRecursive::
-
-Info 11   [00:00:38.000] response:
+Info seq  [hh:mm:ss:mss] event:
     {
-      "responseRequired": false
+      "seq": 0,
+      "type": "event",
+      "event": "syntaxDiag",
+      "body": {
+        "file": "/user/username/projects/myproject/a.ts",
+        "diagnostics": [
+          {
+            "start": {
+              "line": 1,
+              "offset": 17
+            },
+            "end": {
+              "line": 1,
+              "offset": 18
+            },
+            "text": "')' expected.",
+            "code": 1005,
+            "category": "error",
+            "relatedInformation": [
+              {
+                "span": {
+                  "start": {
+                    "line": 1,
+                    "offset": 4
+                  },
+                  "end": {
+                    "line": 1,
+                    "offset": 5
+                  },
+                  "file": "/user/username/projects/myproject/a.ts"
+                },
+                "message": "The parser expected to find a ')' to match the '(' token here.",
+                "category": "error",
+                "code": 1007
+              }
+            ]
+          }
+        ]
+      }
     }
-Before checking timeout queue length (1) and running
-
-PolledWatches::
-
-FsWatches::
-
-FsWatchesRecursive::
-
-Info 12   [00:00:39.000] Session does not support events: ignored event: {"seq":0,"type":"event","event":"syntaxDiag","body":{"file":"/user/username/projects/myproject/a.ts","diagnostics":[{"start":{"line":1,"offset":17},"end":{"line":1,"offset":18},"text":"')' expected.","code":1005,"category":"error","relatedInformation":[{"span":{"start":{"line":1,"offset":4},"end":{"line":1,"offset":5},"file":"/user/username/projects/myproject/a.ts"},"message":"The parser expected to find a ')' to match the '(' token here.","category":"error","code":1007}]}]}}
-Info 13   [00:00:40.000] Session does not support events: ignored event: {"seq":0,"type":"event","event":"requestCompleted","body":{"request_seq":3}}
-After checking timeout queue length (1) and running
-
-PolledWatches::
-
-FsWatches::
-
-FsWatchesRecursive::
+Info seq  [hh:mm:ss:mss] event:
+    {
+      "seq": 0,
+      "type": "event",
+      "event": "requestCompleted",
+      "body": {
+        "request_seq": 3,
+        "performanceData": {
+          "diagnosticsDuration": [
+            {
+              "syntaxDiag": *,
+              "file": "/user/username/projects/myproject/a.ts"
+            }
+          ]
+        }
+      }
+    }
+After running Timeout callback:: count: 0

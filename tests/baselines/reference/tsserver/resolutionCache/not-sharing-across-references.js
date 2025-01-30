@@ -1,135 +1,190 @@
-Info 0    [00:00:29.000] Provided types map file "/a/lib/typesMap.json" doesn't exist
-Info 1    [00:00:30.000] request:
-    {
-      "command": "open",
-      "arguments": {
-        "file": "/src/projects/app/appB.ts"
-      },
-      "seq": 1,
-      "type": "request"
-    }
+Info seq  [hh:mm:ss:mss] currentDirectory:: /home/src/Vscode/Projects/bin useCaseSensitiveFileNames:: false
+Info seq  [hh:mm:ss:mss] libs Location:: /home/src/tslibs/TS/Lib
+Info seq  [hh:mm:ss:mss] globalTypingsCacheLocation:: /home/src/Library/Caches/typescript
+Info seq  [hh:mm:ss:mss] Provided types map file "/home/src/tslibs/TS/Lib/typesMap.json" doesn't exist
 Before request
-//// [/src/projects/node_modules/moduleX/index.d.ts]
+//// [/users/username/projects/node_modules/moduleX/index.d.ts]
 export const x = 10;
 
-//// [/src/projects/common/tsconfig.json]
-{"compilerOptions":{"composite":true,"traceResolution":true}}
+//// [/users/username/projects/common/tsconfig.json]
+{
+  "compilerOptions": {
+    "composite": true,
+    "traceResolution": true
+  }
+}
 
-//// [/src/projects/common/moduleA.ts]
+//// [/users/username/projects/common/moduleA.ts]
 export const a = 10;
 
-//// [/src/projects/common/moduleB.ts]
+//// [/users/username/projects/common/moduleB.ts]
 import { x } from "moduleX";
 export const b = x;
 
 
-//// [/src/projects/app/tsconfig.json]
-{"compilerOptions":{"composite":true,"traceResolution":true,"typeRoots":[]},"references":[{"path":"../common"}]}
+//// [/users/username/projects/app/tsconfig.json]
+{
+  "compilerOptions": {
+    "composite": true,
+    "traceResolution": true,
+    "typeRoots": []
+  },
+  "references": [
+    {
+      "path": "../common"
+    }
+  ]
+}
 
-//// [/src/projects/app/appA.ts]
+//// [/users/username/projects/app/appA.ts]
 import { x } from "moduleX";
 export const y = x;
 
 
-//// [/src/projects/app/appB.ts]
+//// [/users/username/projects/app/appB.ts]
 import { x } from "../common/moduleB";
 export const y = x;
 
 
+//// [/home/src/tslibs/TS/Lib/lib.d.ts]
+/// <reference no-default-lib="true"/>
+interface Boolean {}
+interface Function {}
+interface CallableFunction {}
+interface NewableFunction {}
+interface IArguments {}
+interface Number { toExponential: any; }
+interface Object {}
+interface RegExp {}
+interface String { charAt: any; }
+interface Array<T> { length: number; [n: number]: T; }
+interface ReadonlyArray<T> {}
+declare const console: { log(msg: any): void; };
 
-PolledWatches::
 
-FsWatches::
-
-FsWatchesRecursive::
-
-Info 2    [00:00:31.000] Search path: /src/projects/app
-Info 3    [00:00:32.000] For info: /src/projects/app/appB.ts :: Config file name: /src/projects/app/tsconfig.json
-Info 4    [00:00:33.000] Creating configuration project /src/projects/app/tsconfig.json
-Info 5    [00:00:34.000] FileWatcher:: Added:: WatchInfo: /src/projects/app/tsconfig.json 2000 undefined Project: /src/projects/app/tsconfig.json WatchType: Config file
-Info 6    [00:00:35.000] Config: /src/projects/app/tsconfig.json : {
+Info seq  [hh:mm:ss:mss] request:
+    {
+      "command": "open",
+      "arguments": {
+        "file": "/users/username/projects/app/appB.ts"
+      },
+      "seq": 1,
+      "type": "request"
+    }
+Info seq  [hh:mm:ss:mss] getConfigFileNameForFile:: File: /users/username/projects/app/appB.ts ProjectRootPath: undefined:: Result: /users/username/projects/app/tsconfig.json
+Info seq  [hh:mm:ss:mss] Creating ConfiguredProject: /users/username/projects/app/tsconfig.json, currentDirectory: /users/username/projects/app
+Info seq  [hh:mm:ss:mss] FileWatcher:: Added:: WatchInfo: /users/username/projects/app/tsconfig.json 2000 undefined Project: /users/username/projects/app/tsconfig.json WatchType: Config file
+Info seq  [hh:mm:ss:mss] Config: /users/username/projects/app/tsconfig.json : {
  "rootNames": [
-  "/src/projects/app/appA.ts",
-  "/src/projects/app/appB.ts"
+  "/users/username/projects/app/appA.ts",
+  "/users/username/projects/app/appB.ts"
  ],
  "options": {
   "composite": true,
   "traceResolution": true,
   "typeRoots": [],
-  "configFilePath": "/src/projects/app/tsconfig.json"
+  "configFilePath": "/users/username/projects/app/tsconfig.json"
  },
  "projectReferences": [
   {
-   "path": "/src/projects/common",
+   "path": "/users/username/projects/common",
    "originalPath": "../common"
   }
  ]
 }
-Info 7    [00:00:36.000] DirectoryWatcher:: Added:: WatchInfo: /src/projects/app 1 undefined Config: /src/projects/app/tsconfig.json WatchType: Wild card directory
-Info 8    [00:00:37.000] Elapsed:: *ms DirectoryWatcher:: Added:: WatchInfo: /src/projects/app 1 undefined Config: /src/projects/app/tsconfig.json WatchType: Wild card directory
-Info 9    [00:00:38.000] FileWatcher:: Added:: WatchInfo: /src/projects/app/appA.ts 500 undefined WatchType: Closed Script info
-Info 10   [00:00:39.000] Starting updateGraphWorker: Project: /src/projects/app/tsconfig.json
-Info 11   [00:00:40.000] Config: /src/projects/common/tsconfig.json : {
+Info seq  [hh:mm:ss:mss] event:
+    {
+      "seq": 0,
+      "type": "event",
+      "event": "projectLoadingStart",
+      "body": {
+        "projectName": "/users/username/projects/app/tsconfig.json",
+        "reason": "Creating possible configured project for /users/username/projects/app/appB.ts to open"
+      }
+    }
+Info seq  [hh:mm:ss:mss] DirectoryWatcher:: Added:: WatchInfo: /users/username/projects/app 1 undefined Config: /users/username/projects/app/tsconfig.json WatchType: Wild card directory
+Info seq  [hh:mm:ss:mss] Elapsed:: *ms DirectoryWatcher:: Added:: WatchInfo: /users/username/projects/app 1 undefined Config: /users/username/projects/app/tsconfig.json WatchType: Wild card directory
+Info seq  [hh:mm:ss:mss] FileWatcher:: Added:: WatchInfo: /users/username/projects/app/appA.ts 500 undefined WatchType: Closed Script info
+Info seq  [hh:mm:ss:mss] Starting updateGraphWorker: Project: /users/username/projects/app/tsconfig.json
+Info seq  [hh:mm:ss:mss] Config: /users/username/projects/common/tsconfig.json : {
  "rootNames": [
-  "/src/projects/common/moduleA.ts",
-  "/src/projects/common/moduleB.ts"
+  "/users/username/projects/common/moduleA.ts",
+  "/users/username/projects/common/moduleB.ts"
  ],
  "options": {
   "composite": true,
   "traceResolution": true,
-  "configFilePath": "/src/projects/common/tsconfig.json"
+  "configFilePath": "/users/username/projects/common/tsconfig.json"
  }
 }
-Info 12   [00:00:41.000] FileWatcher:: Added:: WatchInfo: /src/projects/common/tsconfig.json 2000 undefined Project: /src/projects/app/tsconfig.json WatchType: Config file
-Info 13   [00:00:42.000] DirectoryWatcher:: Added:: WatchInfo: /src/projects/common 1 undefined Config: /src/projects/common/tsconfig.json WatchType: Wild card directory
-Info 14   [00:00:43.000] Elapsed:: *ms DirectoryWatcher:: Added:: WatchInfo: /src/projects/common 1 undefined Config: /src/projects/common/tsconfig.json WatchType: Wild card directory
-Info 15   [00:00:44.000] ======== Resolving module 'moduleX' from '/src/projects/app/appA.ts'. ========
-Info 16   [00:00:45.000] Module resolution kind is not specified, using 'Node10'.
-Info 17   [00:00:46.000] Loading module 'moduleX' from 'node_modules' folder, target file types: TypeScript, Declaration.
-Info 18   [00:00:47.000] Directory '/src/projects/app/node_modules' does not exist, skipping all lookups in it.
-Info 19   [00:00:48.000] File '/src/projects/node_modules/moduleX/package.json' does not exist.
-Info 20   [00:00:49.000] File '/src/projects/node_modules/moduleX.ts' does not exist.
-Info 21   [00:00:50.000] File '/src/projects/node_modules/moduleX.tsx' does not exist.
-Info 22   [00:00:51.000] File '/src/projects/node_modules/moduleX.d.ts' does not exist.
-Info 23   [00:00:52.000] File '/src/projects/node_modules/moduleX/index.ts' does not exist.
-Info 24   [00:00:53.000] File '/src/projects/node_modules/moduleX/index.tsx' does not exist.
-Info 25   [00:00:54.000] File '/src/projects/node_modules/moduleX/index.d.ts' exist - use it as a name resolution result.
-Info 26   [00:00:55.000] Resolving real path for '/src/projects/node_modules/moduleX/index.d.ts', result '/src/projects/node_modules/moduleX/index.d.ts'.
-Info 27   [00:00:56.000] ======== Module name 'moduleX' was successfully resolved to '/src/projects/node_modules/moduleX/index.d.ts'. ========
-Info 28   [00:00:57.000] DirectoryWatcher:: Added:: WatchInfo: /src/projects/node_modules 1 undefined WatchType: node_modules for closed script infos and package.jsons affecting module specifier cache
-Info 29   [00:00:58.000] Elapsed:: *ms DirectoryWatcher:: Added:: WatchInfo: /src/projects/node_modules 1 undefined WatchType: node_modules for closed script infos and package.jsons affecting module specifier cache
-Info 30   [00:00:59.000] ======== Resolving module '../common/moduleB' from '/src/projects/app/appB.ts'. ========
-Info 31   [00:01:00.000] Module resolution kind is not specified, using 'Node10'.
-Info 32   [00:01:01.000] Loading module as file / folder, candidate module location '/src/projects/common/moduleB', target file types: TypeScript, Declaration.
-Info 33   [00:01:02.000] File '/src/projects/common/moduleB.ts' exist - use it as a name resolution result.
-Info 34   [00:01:03.000] ======== Module name '../common/moduleB' was successfully resolved to '/src/projects/common/moduleB.ts'. ========
-Info 35   [00:01:04.000] FileWatcher:: Added:: WatchInfo: /src/projects/common/moduleB.ts 500 undefined WatchType: Closed Script info
-Info 36   [00:01:05.000] ======== Resolving module 'moduleX' from '/src/projects/common/moduleB.ts'. ========
-Info 37   [00:01:06.000] Using compiler options of project reference redirect '/src/projects/common/tsconfig.json'.
-Info 38   [00:01:07.000] Module resolution kind is not specified, using 'Node10'.
-Info 39   [00:01:08.000] Loading module 'moduleX' from 'node_modules' folder, target file types: TypeScript, Declaration.
-Info 40   [00:01:09.000] Directory '/src/projects/common/node_modules' does not exist, skipping all lookups in it.
-Info 41   [00:01:10.000] File '/src/projects/node_modules/moduleX/package.json' does not exist according to earlier cached lookups.
-Info 42   [00:01:11.000] File '/src/projects/node_modules/moduleX.ts' does not exist.
-Info 43   [00:01:12.000] File '/src/projects/node_modules/moduleX.tsx' does not exist.
-Info 44   [00:01:13.000] File '/src/projects/node_modules/moduleX.d.ts' does not exist.
-Info 45   [00:01:14.000] File '/src/projects/node_modules/moduleX/index.ts' does not exist.
-Info 46   [00:01:15.000] File '/src/projects/node_modules/moduleX/index.tsx' does not exist.
-Info 47   [00:01:16.000] File '/src/projects/node_modules/moduleX/index.d.ts' exist - use it as a name resolution result.
-Info 48   [00:01:17.000] Resolving real path for '/src/projects/node_modules/moduleX/index.d.ts', result '/src/projects/node_modules/moduleX/index.d.ts'.
-Info 49   [00:01:18.000] ======== Module name 'moduleX' was successfully resolved to '/src/projects/node_modules/moduleX/index.d.ts'. ========
-Info 50   [00:01:19.000] DirectoryWatcher:: Added:: WatchInfo: /src/projects/app/node_modules 1 undefined Project: /src/projects/app/tsconfig.json WatchType: Failed Lookup Locations
-Info 51   [00:01:20.000] Elapsed:: *ms DirectoryWatcher:: Added:: WatchInfo: /src/projects/app/node_modules 1 undefined Project: /src/projects/app/tsconfig.json WatchType: Failed Lookup Locations
-Info 52   [00:01:21.000] FileWatcher:: Added:: WatchInfo: /a/lib/lib.d.ts 500 undefined Project: /src/projects/app/tsconfig.json WatchType: Missing file
-Info 53   [00:01:22.000] Finishing updateGraphWorker: Project: /src/projects/app/tsconfig.json Version: 1 structureChanged: true structureIsReused:: Not Elapsed:: *ms
-Info 54   [00:01:23.000] Project '/src/projects/app/tsconfig.json' (Configured)
-Info 55   [00:01:24.000] 	Files (4)
-	/src/projects/node_modules/moduleX/index.d.ts
-	/src/projects/app/appA.ts
-	/src/projects/common/moduleB.ts
-	/src/projects/app/appB.ts
+Info seq  [hh:mm:ss:mss] FileWatcher:: Added:: WatchInfo: /users/username/projects/common/tsconfig.json 2000 undefined Project: /users/username/projects/app/tsconfig.json WatchType: Config file
+Info seq  [hh:mm:ss:mss] DirectoryWatcher:: Added:: WatchInfo: /users/username/projects/common 1 undefined Config: /users/username/projects/common/tsconfig.json WatchType: Wild card directory
+Info seq  [hh:mm:ss:mss] Elapsed:: *ms DirectoryWatcher:: Added:: WatchInfo: /users/username/projects/common 1 undefined Config: /users/username/projects/common/tsconfig.json WatchType: Wild card directory
+Info seq  [hh:mm:ss:mss] ======== Resolving module 'moduleX' from '/users/username/projects/app/appA.ts'. ========
+Info seq  [hh:mm:ss:mss] Module resolution kind is not specified, using 'Node10'.
+Info seq  [hh:mm:ss:mss] Loading module 'moduleX' from 'node_modules' folder, target file types: TypeScript, Declaration.
+Info seq  [hh:mm:ss:mss] Searching all ancestor node_modules directories for preferred extensions: TypeScript, Declaration.
+Info seq  [hh:mm:ss:mss] Directory '/users/username/projects/app/node_modules' does not exist, skipping all lookups in it.
+Info seq  [hh:mm:ss:mss] File '/users/username/projects/node_modules/moduleX/package.json' does not exist.
+Info seq  [hh:mm:ss:mss] File '/users/username/projects/node_modules/moduleX.ts' does not exist.
+Info seq  [hh:mm:ss:mss] File '/users/username/projects/node_modules/moduleX.tsx' does not exist.
+Info seq  [hh:mm:ss:mss] File '/users/username/projects/node_modules/moduleX.d.ts' does not exist.
+Info seq  [hh:mm:ss:mss] File '/users/username/projects/node_modules/moduleX/index.ts' does not exist.
+Info seq  [hh:mm:ss:mss] File '/users/username/projects/node_modules/moduleX/index.tsx' does not exist.
+Info seq  [hh:mm:ss:mss] File '/users/username/projects/node_modules/moduleX/index.d.ts' exists - use it as a name resolution result.
+Info seq  [hh:mm:ss:mss] Resolving real path for '/users/username/projects/node_modules/moduleX/index.d.ts', result '/users/username/projects/node_modules/moduleX/index.d.ts'.
+Info seq  [hh:mm:ss:mss] ======== Module name 'moduleX' was successfully resolved to '/users/username/projects/node_modules/moduleX/index.d.ts'. ========
+Info seq  [hh:mm:ss:mss] File '/users/username/projects/node_modules/moduleX/package.json' does not exist according to earlier cached lookups.
+Info seq  [hh:mm:ss:mss] File '/users/username/projects/node_modules/package.json' does not exist.
+Info seq  [hh:mm:ss:mss] File '/users/username/projects/package.json' does not exist.
+Info seq  [hh:mm:ss:mss] File '/users/username/package.json' does not exist.
+Info seq  [hh:mm:ss:mss] File '/users/package.json' does not exist.
+Info seq  [hh:mm:ss:mss] File '/package.json' does not exist.
+Info seq  [hh:mm:ss:mss] DirectoryWatcher:: Added:: WatchInfo: /users/username/projects/node_modules 1 undefined WatchType: node_modules for closed script infos and package.jsons affecting module specifier cache
+Info seq  [hh:mm:ss:mss] Elapsed:: *ms DirectoryWatcher:: Added:: WatchInfo: /users/username/projects/node_modules 1 undefined WatchType: node_modules for closed script infos and package.jsons affecting module specifier cache
+Info seq  [hh:mm:ss:mss] ======== Resolving module '../common/moduleB' from '/users/username/projects/app/appB.ts'. ========
+Info seq  [hh:mm:ss:mss] Module resolution kind is not specified, using 'Node10'.
+Info seq  [hh:mm:ss:mss] Loading module as file / folder, candidate module location '/users/username/projects/common/moduleB', target file types: TypeScript, Declaration.
+Info seq  [hh:mm:ss:mss] File '/users/username/projects/common/moduleB.ts' exists - use it as a name resolution result.
+Info seq  [hh:mm:ss:mss] ======== Module name '../common/moduleB' was successfully resolved to '/users/username/projects/common/moduleB.ts'. ========
+Info seq  [hh:mm:ss:mss] FileWatcher:: Added:: WatchInfo: /users/username/projects/common/moduleB.ts 500 undefined WatchType: Closed Script info
+Info seq  [hh:mm:ss:mss] ======== Resolving module 'moduleX' from '/users/username/projects/common/moduleB.ts'. ========
+Info seq  [hh:mm:ss:mss] Using compiler options of project reference redirect '/users/username/projects/common/tsconfig.json'.
+Info seq  [hh:mm:ss:mss] Module resolution kind is not specified, using 'Node10'.
+Info seq  [hh:mm:ss:mss] Loading module 'moduleX' from 'node_modules' folder, target file types: TypeScript, Declaration.
+Info seq  [hh:mm:ss:mss] Searching all ancestor node_modules directories for preferred extensions: TypeScript, Declaration.
+Info seq  [hh:mm:ss:mss] Directory '/users/username/projects/common/node_modules' does not exist, skipping all lookups in it.
+Info seq  [hh:mm:ss:mss] File '/users/username/projects/node_modules/moduleX/package.json' does not exist according to earlier cached lookups.
+Info seq  [hh:mm:ss:mss] File '/users/username/projects/node_modules/moduleX.ts' does not exist.
+Info seq  [hh:mm:ss:mss] File '/users/username/projects/node_modules/moduleX.tsx' does not exist.
+Info seq  [hh:mm:ss:mss] File '/users/username/projects/node_modules/moduleX.d.ts' does not exist.
+Info seq  [hh:mm:ss:mss] File '/users/username/projects/node_modules/moduleX/index.ts' does not exist.
+Info seq  [hh:mm:ss:mss] File '/users/username/projects/node_modules/moduleX/index.tsx' does not exist.
+Info seq  [hh:mm:ss:mss] File '/users/username/projects/node_modules/moduleX/index.d.ts' exists - use it as a name resolution result.
+Info seq  [hh:mm:ss:mss] Resolving real path for '/users/username/projects/node_modules/moduleX/index.d.ts', result '/users/username/projects/node_modules/moduleX/index.d.ts'.
+Info seq  [hh:mm:ss:mss] ======== Module name 'moduleX' was successfully resolved to '/users/username/projects/node_modules/moduleX/index.d.ts'. ========
+Info seq  [hh:mm:ss:mss] FileWatcher:: Added:: WatchInfo: /home/src/tslibs/TS/Lib/lib.d.ts 500 undefined WatchType: Closed Script info
+Info seq  [hh:mm:ss:mss] DirectoryWatcher:: Added:: WatchInfo: /users/username/projects/app/node_modules 1 undefined Project: /users/username/projects/app/tsconfig.json WatchType: Failed Lookup Locations
+Info seq  [hh:mm:ss:mss] Elapsed:: *ms DirectoryWatcher:: Added:: WatchInfo: /users/username/projects/app/node_modules 1 undefined Project: /users/username/projects/app/tsconfig.json WatchType: Failed Lookup Locations
+Info seq  [hh:mm:ss:mss] DirectoryWatcher:: Added:: WatchInfo: /users/username/projects/node_modules 1 undefined Project: /users/username/projects/app/tsconfig.json WatchType: Failed Lookup Locations
+Info seq  [hh:mm:ss:mss] Elapsed:: *ms DirectoryWatcher:: Added:: WatchInfo: /users/username/projects/node_modules 1 undefined Project: /users/username/projects/app/tsconfig.json WatchType: Failed Lookup Locations
+Info seq  [hh:mm:ss:mss] DirectoryWatcher:: Added:: WatchInfo: /users/username/projects/common/node_modules 1 undefined Project: /users/username/projects/app/tsconfig.json WatchType: Failed Lookup Locations
+Info seq  [hh:mm:ss:mss] Elapsed:: *ms DirectoryWatcher:: Added:: WatchInfo: /users/username/projects/common/node_modules 1 undefined Project: /users/username/projects/app/tsconfig.json WatchType: Failed Lookup Locations
+Info seq  [hh:mm:ss:mss] FileWatcher:: Added:: WatchInfo: /users/username/projects/node_modules/moduleX/package.json 2000 undefined Project: /users/username/projects/app/tsconfig.json WatchType: File location affecting resolution
+Info seq  [hh:mm:ss:mss] FileWatcher:: Added:: WatchInfo: /users/username/projects/node_modules/package.json 2000 undefined Project: /users/username/projects/app/tsconfig.json WatchType: File location affecting resolution
+Info seq  [hh:mm:ss:mss] FileWatcher:: Added:: WatchInfo: /users/username/projects/package.json 2000 undefined Project: /users/username/projects/app/tsconfig.json WatchType: File location affecting resolution
+Info seq  [hh:mm:ss:mss] Finishing updateGraphWorker: Project: /users/username/projects/app/tsconfig.json projectStateVersion: 1 projectProgramVersion: 0 structureChanged: true structureIsReused:: Not Elapsed:: *ms
+Info seq  [hh:mm:ss:mss] Project '/users/username/projects/app/tsconfig.json' (Configured)
+Info seq  [hh:mm:ss:mss] 	Files (5)
+	/home/src/tslibs/TS/Lib/lib.d.ts Text-1 "/// <reference no-default-lib=\"true\"/>\ninterface Boolean {}\ninterface Function {}\ninterface CallableFunction {}\ninterface NewableFunction {}\ninterface IArguments {}\ninterface Number { toExponential: any; }\ninterface Object {}\ninterface RegExp {}\ninterface String { charAt: any; }\ninterface Array<T> { length: number; [n: number]: T; }\ninterface ReadonlyArray<T> {}\ndeclare const console: { log(msg: any): void; };"
+	/users/username/projects/node_modules/moduleX/index.d.ts Text-1 "export const x = 10;"
+	/users/username/projects/app/appA.ts Text-1 "import { x } from \"moduleX\";\nexport const y = x;\n"
+	/users/username/projects/common/moduleB.ts Text-1 "import { x } from \"moduleX\";\nexport const b = x;\n"
+	/users/username/projects/app/appB.ts SVC-1-0 "import { x } from \"../common/moduleB\";\nexport const y = x;\n"
 
 
+	../../../../home/src/tslibs/TS/Lib/lib.d.ts
+	  Default library for target 'es5'
 	../node_modules/moduleX/index.d.ts
 	  Imported via "moduleX" from file 'appA.ts'
 	  Imported via "moduleX" from file '../common/moduleB.ts'
@@ -140,43 +195,149 @@ Info 55   [00:01:24.000] 	Files (4)
 	appB.ts
 	  Matched by default include pattern '**/*'
 
-Info 56   [00:01:25.000] -----------------------------------------------
-Info 57   [00:01:26.000] Search path: /src/projects/app
-Info 58   [00:01:27.000] For info: /src/projects/app/tsconfig.json :: No config files found.
-Info 59   [00:01:28.000] Project '/src/projects/app/tsconfig.json' (Configured)
-Info 59   [00:01:29.000] 	Files (4)
+Info seq  [hh:mm:ss:mss] -----------------------------------------------
+Info seq  [hh:mm:ss:mss] event:
+    {
+      "seq": 0,
+      "type": "event",
+      "event": "projectLoadingFinish",
+      "body": {
+        "projectName": "/users/username/projects/app/tsconfig.json"
+      }
+    }
+Info seq  [hh:mm:ss:mss] event:
+    {
+      "seq": 0,
+      "type": "event",
+      "event": "telemetry",
+      "body": {
+        "telemetryEventName": "projectInfo",
+        "payload": {
+          "projectId": "e8634325a3d522140c39348cfc743e2c7f0cbfb4fd1598a1fc32a4d0e9c930b8",
+          "fileStats": {
+            "js": 0,
+            "jsSize": 0,
+            "jsx": 0,
+            "jsxSize": 0,
+            "ts": 3,
+            "tsSize": 157,
+            "tsx": 0,
+            "tsxSize": 0,
+            "dts": 2,
+            "dtsSize": 433,
+            "deferred": 0,
+            "deferredSize": 0
+          },
+          "compilerOptions": {
+            "composite": true,
+            "traceResolution": true,
+            "typeRoots": []
+          },
+          "typeAcquisition": {
+            "enable": false,
+            "include": false,
+            "exclude": false
+          },
+          "extends": false,
+          "files": false,
+          "include": false,
+          "exclude": false,
+          "compileOnSave": false,
+          "configFileName": "tsconfig.json",
+          "projectType": "configured",
+          "languageServiceEnabled": true,
+          "version": "FakeVersion"
+        }
+      }
+    }
+Info seq  [hh:mm:ss:mss] event:
+    {
+      "seq": 0,
+      "type": "event",
+      "event": "configFileDiag",
+      "body": {
+        "triggerFile": "/users/username/projects/app/appB.ts",
+        "configFile": "/users/username/projects/app/tsconfig.json",
+        "diagnostics": []
+      }
+    }
+Info seq  [hh:mm:ss:mss] getConfigFileNameForFile:: File: /users/username/projects/app/tsconfig.json ProjectRootPath: undefined:: Result: undefined
+Info seq  [hh:mm:ss:mss] Project '/users/username/projects/app/tsconfig.json' (Configured)
+Info seq  [hh:mm:ss:mss] 	Files (5)
 
-Info 59   [00:01:30.000] -----------------------------------------------
-Info 59   [00:01:31.000] Open files: 
-Info 59   [00:01:32.000] 	FileName: /src/projects/app/appB.ts ProjectRootPath: undefined
-Info 59   [00:01:33.000] 		Projects: /src/projects/app/tsconfig.json
+Info seq  [hh:mm:ss:mss] -----------------------------------------------
+Info seq  [hh:mm:ss:mss] Open files: 
+Info seq  [hh:mm:ss:mss] 	FileName: /users/username/projects/app/appB.ts ProjectRootPath: undefined
+Info seq  [hh:mm:ss:mss] 		Projects: /users/username/projects/app/tsconfig.json
+Info seq  [hh:mm:ss:mss] response:
+    {
+      "seq": 0,
+      "type": "response",
+      "command": "open",
+      "request_seq": 1,
+      "success": true,
+      "performanceData": {
+        "updateGraphDurationMs": *
+      }
+    }
 After request
 
 PolledWatches::
-/src/projects/app/node_modules:
+/users/username/projects/app/node_modules: *new*
   {"pollingInterval":500}
-/a/lib/lib.d.ts:
+/users/username/projects/common/node_modules: *new*
   {"pollingInterval":500}
+/users/username/projects/node_modules/moduleX/package.json: *new*
+  {"pollingInterval":2000}
+/users/username/projects/node_modules/package.json: *new*
+  {"pollingInterval":2000}
+/users/username/projects/package.json: *new*
+  {"pollingInterval":2000}
 
 FsWatches::
-/src/projects/app/tsconfig.json:
+/home/src/tslibs/TS/Lib/lib.d.ts: *new*
   {}
-/src/projects/app/appa.ts:
+/users/username/projects/app/appA.ts: *new*
   {}
-/src/projects/common/tsconfig.json:
+/users/username/projects/app/tsconfig.json: *new*
   {}
-/src/projects/common/moduleb.ts:
+/users/username/projects/common/moduleB.ts: *new*
+  {}
+/users/username/projects/common/tsconfig.json: *new*
   {}
 
 FsWatchesRecursive::
-/src/projects/app:
+/users/username/projects/app: *new*
   {}
-/src/projects/common:
+/users/username/projects/common: *new*
   {}
-/src/projects/node_modules:
+/users/username/projects/node_modules: *new*
   {}
 
-Info 59   [00:01:34.000] response:
-    {
-      "responseRequired": false
-    }
+Projects::
+/users/username/projects/app/tsconfig.json (Configured) *new*
+    projectStateVersion: 1
+    projectProgramVersion: 1
+    autoImportProviderHost: false
+
+ScriptInfos::
+/home/src/tslibs/TS/Lib/lib.d.ts *new*
+    version: Text-1
+    containingProjects: 1
+        /users/username/projects/app/tsconfig.json
+/users/username/projects/app/appA.ts *new*
+    version: Text-1
+    containingProjects: 1
+        /users/username/projects/app/tsconfig.json
+/users/username/projects/app/appB.ts (Open) *new*
+    version: SVC-1-0
+    containingProjects: 1
+        /users/username/projects/app/tsconfig.json *default*
+/users/username/projects/common/moduleB.ts *new*
+    version: Text-1
+    containingProjects: 1
+        /users/username/projects/app/tsconfig.json
+/users/username/projects/node_modules/moduleX/index.d.ts *new*
+    version: Text-1
+    containingProjects: 1
+        /users/username/projects/app/tsconfig.json

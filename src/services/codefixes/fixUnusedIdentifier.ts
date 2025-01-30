@@ -1,11 +1,17 @@
 import {
+    codeFixAll,
+    createCodeFixAction,
+    registerCodeFix,
+} from "../_namespaces/ts.codefix.js";
+import {
     ArrayBindingPattern,
     CancellationToken,
     cast,
     CodeFixAction,
+    CodeFixContext,
     Debug,
-    DiagnosticAndArguments,
     DiagnosticMessage,
+    DiagnosticOrDiagnosticAndArguments,
     Diagnostics,
     factory,
     FileTextChanges,
@@ -14,15 +20,19 @@ import {
     forEach,
     FunctionLikeDeclaration,
     getJSDocParameterTags,
+    getNewLineOrDefaultFromHost,
+    getPrecedingNonSpaceCharacterPosition,
     getTokenAtPosition,
     Identifier,
     ImportDeclaration,
     isArrayBindingPattern,
     isBinaryExpression,
     isCallExpression,
+    isCallLikeExpression,
     isComputedPropertyName,
     isDeclarationWithTypeParameterChildren,
     isExpressionStatement,
+    isFunctionDeclaration,
     isIdentifier,
     isImportClause,
     isImportDeclaration,
@@ -37,11 +47,14 @@ import {
     isPrefixUnaryExpression,
     isPropertyAccessExpression,
     isSuperKeyword,
+    isVariableDeclaration,
     isVariableDeclarationList,
+    length,
     map,
     Node,
     ObjectBindingPattern,
     ParameterDeclaration,
+    probablyUsesSemicolons,
     Program,
     showModuleSpecifier,
     SourceFile,
@@ -51,12 +64,7 @@ import {
     TypeChecker,
     VariableDeclaration,
     VariableDeclarationList,
-} from "../_namespaces/ts";
-import {
-    codeFixAll,
-    createCodeFixAction,
-    registerCodeFix,
-} from "../_namespaces/ts.codefix";
+} from "../_namespaces/ts.js";
 
 const fixName = "unusedIdentifier";
 const fixIdPrefix = "unusedIdentifier_prefix";
@@ -105,24 +113,25 @@ registerCodeFix({
                 const elements = token.parent.elements;
                 const diagnostic: [DiagnosticMessage, string] = [
                     elements.length > 1 ? Diagnostics.Remove_unused_declarations_for_Colon_0 : Diagnostics.Remove_unused_declaration_for_Colon_0,
-                    map(elements, e => e.getText(sourceFile)).join(", ")
+                    map(elements, e => e.getText(sourceFile)).join(", "),
                 ];
                 return [
-                    createDeleteFix(textChanges.ChangeTracker.with(context, t =>
-                        deleteDestructuringElements(t, sourceFile, token.parent as ObjectBindingPattern | ArrayBindingPattern)), diagnostic)
+                    createDeleteFix(textChanges.ChangeTracker.with(context, t => deleteDestructuringElements(t, sourceFile, token.parent as ObjectBindingPattern | ArrayBindingPattern)), diagnostic),
                 ];
             }
             return [
-                createDeleteFix(textChanges.ChangeTracker.with(context, t =>
-                    t.delete(sourceFile, token.parent.parent)), Diagnostics.Remove_unused_destructuring_declaration)
+                createDeleteFix(textChanges.ChangeTracker.with(context, t => deleteDestructuring(context, t, sourceFile, token.parent as ObjectBindingPattern | ArrayBindingPattern)), Diagnostics.Remove_unused_destructuring_declaration),
             ];
         }
 
         if (canDeleteEntireVariableStatement(sourceFile, token)) {
             return [
-                createDeleteFix(textChanges.ChangeTracker.with(context, t =>
-                    deleteEntireVariableStatement(t, sourceFile, token.parent as VariableDeclarationList)), Diagnostics.Remove_variable_statement)
+                createDeleteFix(textChanges.ChangeTracker.with(context, t => deleteEntireVariableStatement(t, sourceFile, token.parent as VariableDeclarationList)), Diagnostics.Remove_variable_statement),
             ];
+        }
+
+        if (isIdentifier(token) && isFunctionDeclaration(token.parent)) {
+            return [createDeleteFix(textChanges.ChangeTracker.with(context, t => deleteFunctionLikeDeclaration(t, sourceFile, token.parent as FunctionLikeDeclaration)), [Diagnostics.Remove_unused_declaration_for_Colon_0, token.getText(sourceFile)])];
         }
 
         const result: CodeFixAction[] = [];
@@ -132,8 +141,7 @@ registerCodeFix({
             result.push(createCodeFixAction(fixName, changes, [Diagnostics.Replace_infer_0_with_unknown, name], fixIdInfer, Diagnostics.Replace_all_unused_infer_with_unknown));
         }
         else {
-            const deletion = textChanges.ChangeTracker.with(context, t =>
-                tryDeleteDeclaration(sourceFile, token, t, checker, sourceFiles, program, cancellationToken, /*isFixAll*/ false));
+            const deletion = textChanges.ChangeTracker.with(context, t => tryDeleteDeclaration(sourceFile, token, t, checker, sourceFiles, program, cancellationToken, /*isFixAll*/ false));
             if (deletion.length) {
                 const name = isComputedPropertyName(token.parent) ? token.parent : token;
                 result.push(createDeleteFix(deletion, [Diagnostics.Remove_unused_declaration_for_Colon_0, name.getText(sourceFile)]));
@@ -192,6 +200,9 @@ registerCodeFix({
                     else if (canDeleteEntireVariableStatement(sourceFile, token)) {
                         deleteEntireVariableStatement(changes, sourceFile, token.parent as VariableDeclarationList);
                     }
+                    else if (isIdentifier(token) && isFunctionDeclaration(token.parent)) {
+                        deleteFunctionLikeDeclaration(changes, sourceFile, token.parent as FunctionLikeDeclaration);
+                    }
                     else {
                         tryDeleteDeclaration(sourceFile, token, changes, checker, sourceFiles, program, cancellationToken, /*isFixAll*/ true);
                     }
@@ -213,7 +224,7 @@ function changeInferToUnknown(changes: textChanges.ChangeTracker, sourceFile: So
     changes.replaceNode(sourceFile, token.parent, factory.createKeywordTypeNode(SyntaxKind.UnknownKeyword));
 }
 
-function createDeleteFix(changes: FileTextChanges[], diag: DiagnosticAndArguments): CodeFixAction {
+function createDeleteFix(changes: FileTextChanges[], diag: DiagnosticOrDiagnosticAndArguments): CodeFixAction {
     return createCodeFixAction(fixName, changes, diag, fixIdDelete, Diagnostics.Delete_all_unused_declarations);
 }
 
@@ -243,6 +254,27 @@ function deleteDestructuringElements(changes: textChanges.ChangeTracker, sourceF
     forEach(node.elements, n => changes.delete(sourceFile, n));
 }
 
+function deleteDestructuring(context: CodeFixContext, changes: textChanges.ChangeTracker, sourceFile: SourceFile, { parent }: ObjectBindingPattern | ArrayBindingPattern) {
+    if (isVariableDeclaration(parent) && parent.initializer && isCallLikeExpression(parent.initializer)) {
+        if (isVariableDeclarationList(parent.parent) && length(parent.parent.declarations) > 1) {
+            const varStatement = parent.parent.parent;
+            const pos = varStatement.getStart(sourceFile);
+            const end = varStatement.end;
+            changes.delete(sourceFile, parent);
+            changes.insertNodeAt(sourceFile, end, parent.initializer, {
+                prefix: getNewLineOrDefaultFromHost(context.host, context.formatContext.options) + sourceFile.text.slice(getPrecedingNonSpaceCharacterPosition(sourceFile.text, pos - 1), pos),
+                suffix: probablyUsesSemicolons(sourceFile) ? ";" : "",
+            });
+        }
+        else {
+            changes.replaceNode(sourceFile, parent.parent, parent.initializer);
+        }
+    }
+    else {
+        changes.delete(sourceFile, parent);
+    }
+}
+
 function tryPrefixDeclaration(changes: textChanges.ChangeTracker, errorCode: number, sourceFile: SourceFile, token: Node): void {
     // Don't offer to prefix a property.
     if (errorCode === Diagnostics.Property_0_is_declared_but_its_value_is_never_read.code) return;
@@ -252,7 +284,7 @@ function tryPrefixDeclaration(changes: textChanges.ChangeTracker, errorCode: num
     if (isIdentifier(token) && canPrefix(token)) {
         changes.replaceNode(sourceFile, token, factory.createIdentifier(`_${token.text}`));
         if (isParameter(token.parent)) {
-            getJSDocParameterTags(token.parent).forEach((tag) => {
+            getJSDocParameterTags(token.parent).forEach(tag => {
                 if (isIdentifier(tag.name)) {
                     changes.replaceNode(sourceFile, tag.name, factory.createIdentifier(`_${tag.name.text}`));
                 }
@@ -310,10 +342,13 @@ function tryDeleteParameter(
     sourceFiles: readonly SourceFile[],
     program: Program,
     cancellationToken: CancellationToken,
-    isFixAll = false): void {
+    isFixAll = false,
+): void {
     if (mayDeleteParameter(checker, sourceFile, parameter, sourceFiles, program, cancellationToken, isFixAll)) {
-        if (parameter.modifiers && parameter.modifiers.length > 0 &&
-            (!isIdentifier(parameter.name) || FindAllReferences.Core.isSymbolReferencedInFile(parameter.name, checker, sourceFile))) {
+        if (
+            parameter.modifiers && parameter.modifiers.length > 0 &&
+            (!isIdentifier(parameter.name) || FindAllReferences.Core.isSymbolReferencedInFile(parameter.name, checker, sourceFile))
+        ) {
             for (const modifier of parameter.modifiers) {
                 if (isModifier(modifier)) {
                     changes.deleteModifier(sourceFile, modifier);
@@ -388,8 +423,7 @@ function mayDeleteParameter(checker: TypeChecker, sourceFile: SourceFile, parame
 }
 
 function isCallbackLike(checker: TypeChecker, sourceFile: SourceFile, name: Identifier): boolean {
-    return !!FindAllReferences.Core.eachSymbolReferenceInFile(name, checker, sourceFile, reference =>
-        isIdentifier(reference) && isCallExpression(reference.parent) && reference.parent.arguments.indexOf(reference) >= 0);
+    return !!FindAllReferences.Core.eachSymbolReferenceInFile(name, checker, sourceFile, reference => isIdentifier(reference) && isCallExpression(reference.parent) && reference.parent.arguments.includes(reference));
 }
 
 function isLastParameter(func: FunctionLikeDeclaration, parameter: ParameterDeclaration, isFixAll: boolean): boolean {
@@ -404,4 +438,13 @@ function isLastParameter(func: FunctionLikeDeclaration, parameter: ParameterDecl
 function mayDeleteExpression(node: Node) {
     return ((isBinaryExpression(node.parent) && node.parent.left === node) ||
         ((isPostfixUnaryExpression(node.parent) || isPrefixUnaryExpression(node.parent)) && node.parent.operand === node)) && isExpressionStatement(node.parent.parent);
+}
+
+function deleteFunctionLikeDeclaration(changes: textChanges.ChangeTracker, sourceFile: SourceFile, node: FunctionLikeDeclaration) {
+    const declarations = node.symbol.declarations;
+    if (declarations) {
+        for (const declaration of declarations) {
+            changes.delete(sourceFile, declaration);
+        }
+    }
 }

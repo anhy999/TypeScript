@@ -24,9 +24,8 @@ import {
     sortAndDeduplicate,
     SortedReadonlyArray,
     SourceMapGenerator,
-    trimStringEnd,
-} from "./_namespaces/ts";
-import * as performance from "./_namespaces/ts.performance";
+} from "./_namespaces/ts.js";
+import * as performance from "./_namespaces/ts.performance.js";
 
 /** @internal */
 export interface SourceMapGeneratorOptions {
@@ -35,39 +34,43 @@ export interface SourceMapGeneratorOptions {
 
 /** @internal */
 export function createSourceMapGenerator(host: EmitHost, file: string, sourceRoot: string, sourcesDirectoryPath: string, generatorOptions: SourceMapGeneratorOptions): SourceMapGenerator {
-    const { enter, exit } = generatorOptions.extendedDiagnostics
+    // Why var? It avoids TDZ checks in the runtime which can be costly.
+    // See: https://github.com/microsoft/TypeScript/issues/52924
+    /* eslint-disable no-var */
+    var { enter, exit } = generatorOptions.extendedDiagnostics
         ? performance.createTimer("Source Map", "beforeSourcemap", "afterSourcemap")
         : performance.nullTimer;
 
     // Current source map file and its index in the sources list
-    const rawSources: string[] = [];
-    const sources: string[] = [];
-    const sourceToSourceIndexMap = new Map<string, number>();
-    let sourcesContent: (string | null)[] | undefined;
+    var rawSources: string[] = [];
+    var sources: string[] = [];
+    var sourceToSourceIndexMap = new Map<string, number>();
+    var sourcesContent: (string | null)[] | undefined; // eslint-disable-line no-restricted-syntax
 
-    const names: string[] = [];
-    let nameToNameIndexMap: Map<string, number> | undefined;
-    const mappingCharCodes: number[] = [];
-    let mappings = "";
+    var names: string[] = [];
+    var nameToNameIndexMap: Map<string, number> | undefined;
+    var mappingCharCodes: number[] = [];
+    var mappings = "";
 
     // Last recorded and encoded mappings
-    let lastGeneratedLine = 0;
-    let lastGeneratedCharacter = 0;
-    let lastSourceIndex = 0;
-    let lastSourceLine = 0;
-    let lastSourceCharacter = 0;
-    let lastNameIndex = 0;
-    let hasLast = false;
+    var lastGeneratedLine = 0;
+    var lastGeneratedCharacter = 0;
+    var lastSourceIndex = 0;
+    var lastSourceLine = 0;
+    var lastSourceCharacter = 0;
+    var lastNameIndex = 0;
+    var hasLast = false;
 
-    let pendingGeneratedLine = 0;
-    let pendingGeneratedCharacter = 0;
-    let pendingSourceIndex = 0;
-    let pendingSourceLine = 0;
-    let pendingSourceCharacter = 0;
-    let pendingNameIndex = 0;
-    let hasPending = false;
-    let hasPendingSource = false;
-    let hasPendingName = false;
+    var pendingGeneratedLine = 0;
+    var pendingGeneratedCharacter = 0;
+    var pendingSourceIndex = 0;
+    var pendingSourceLine = 0;
+    var pendingSourceCharacter = 0;
+    var pendingNameIndex = 0;
+    var hasPending = false;
+    var hasPendingSource = false;
+    var hasPendingName = false;
+    /* eslint-enable no-var */
 
     return {
         getSources: () => rawSources,
@@ -77,16 +80,12 @@ export function createSourceMapGenerator(host: EmitHost, file: string, sourceRoo
         addMapping,
         appendSourceMap,
         toJSON,
-        toString: () => JSON.stringify(toJSON())
+        toString: () => JSON.stringify(toJSON()),
     };
 
     function addSource(fileName: string) {
         enter();
-        const source = getRelativePathToDirectoryOrUrl(sourcesDirectoryPath,
-            fileName,
-            host.getCurrentDirectory(),
-            host.getCanonicalFileName,
-            /*isAbsolutePathAnUrl*/ true);
+        const source = getRelativePathToDirectoryOrUrl(sourcesDirectoryPath, fileName, host.getCurrentDirectory(), host.getCanonicalFileName, /*isAbsolutePathAnUrl*/ true);
 
         let sourceIndex = sourceToSourceIndexMap.get(source);
         if (sourceIndex === undefined) {
@@ -99,7 +98,7 @@ export function createSourceMapGenerator(host: EmitHost, file: string, sourceRoo
         return sourceIndex;
     }
 
-    /* eslint-disable local/boolean-trivia, no-null/no-null */
+    /* eslint-disable no-restricted-syntax */
     function setSourceContent(sourceIndex: number, content: string | null) {
         enter();
         if (content !== null) {
@@ -111,7 +110,7 @@ export function createSourceMapGenerator(host: EmitHost, file: string, sourceRoo
         }
         exit();
     }
-    /* eslint-enable local/boolean-trivia, no-null/no-null */
+    /* eslint-enable no-restricted-syntax */
 
     function addName(name: string) {
         enter();
@@ -149,8 +148,10 @@ export function createSourceMapGenerator(host: EmitHost, file: string, sourceRoo
         Debug.assert(sourceCharacter === undefined || sourceCharacter >= 0, "sourceCharacter cannot be negative");
         enter();
         // If this location wasn't recorded or the location in source is going backwards, record the mapping
-        if (isNewGeneratedPosition(generatedLine, generatedCharacter) ||
-            isBacktrackingSourcePosition(sourceIndex, sourceLine, sourceCharacter)) {
+        if (
+            isNewGeneratedPosition(generatedLine, generatedCharacter) ||
+            isBacktrackingSourcePosition(sourceIndex, sourceLine, sourceCharacter)
+        ) {
             commitPendingMapping();
             pendingGeneratedLine = generatedLine;
             pendingGeneratedCharacter = generatedCharacter;
@@ -180,17 +181,22 @@ export function createSourceMapGenerator(host: EmitHost, file: string, sourceRoo
         const sourceIndexToNewSourceIndexMap: number[] = [];
         let nameIndexToNewNameIndexMap: number[] | undefined;
         const mappingIterator = decodeMappings(map.mappings);
-        for (let iterResult = mappingIterator.next(); !iterResult.done; iterResult = mappingIterator.next()) {
-            const raw = iterResult.value;
-            if (end && (
-                raw.generatedLine > end.line ||
-                (raw.generatedLine === end.line && raw.generatedCharacter > end.character))) {
+        for (const raw of mappingIterator) {
+            if (
+                end && (
+                    raw.generatedLine > end.line ||
+                    (raw.generatedLine === end.line && raw.generatedCharacter > end.character)
+                )
+            ) {
                 break;
             }
 
-            if (start && (
-                raw.generatedLine < start.line ||
-                (start.line === raw.generatedLine && raw.generatedCharacter < start.character))) {
+            if (
+                start && (
+                    raw.generatedLine < start.line ||
+                    (start.line === raw.generatedLine && raw.generatedCharacter < start.character)
+                )
+            ) {
                 continue;
             }
             // Then reencode all the updated mappings into the overall map
@@ -347,18 +353,19 @@ export function createSourceMapGenerator(host: EmitHost, file: string, sourceRoo
                 currentDigit = currentDigit | 32;
             }
             appendMappingCharCode(base64FormatEncode(currentDigit));
-        } while (inValue > 0);
+        }
+        while (inValue > 0);
     }
 }
 
 // Sometimes tools can see the following line as a source mapping url comment, so we mangle it a bit (the [M])
 /** @internal */
-export const sourceMapCommentRegExpDontCareLineStart = /\/\/[@#] source[M]appingURL=(.+)\r?\n?$/;
+export const sourceMapCommentRegExpDontCareLineStart: RegExp = /\/\/[@#] source[M]appingURL=(.+)\r?\n?$/; // eslint-disable-line regexp/no-useless-character-class
 /** @internal */
-export const sourceMapCommentRegExp = /^\/\/[@#] source[M]appingURL=(.+)\r?\n?$/;
+export const sourceMapCommentRegExp: RegExp = /^\/\/[@#] source[M]appingURL=(.+)\r?\n?$/; // eslint-disable-line regexp/no-useless-character-class
 
 /** @internal */
-export const whitespaceOrMapCommentRegExp = /^\s*(\/\/[@#] .*)?$/;
+export const whitespaceOrMapCommentRegExp: RegExp = /^\s*(\/\/[@#] .*)?$/;
 
 /** @internal */
 export interface LineInfo {
@@ -370,7 +377,7 @@ export interface LineInfo {
 export function getLineInfo(text: string, lineStarts: readonly number[]): LineInfo {
     return {
         getLineCount: () => lineStarts.length,
-        getLineText: line => text.substring(lineStarts[line], lineStarts[line + 1])
+        getLineText: line => text.substring(lineStarts[line], lineStarts[line + 1]),
     };
 }
 
@@ -379,12 +386,12 @@ export function getLineInfo(text: string, lineStarts: readonly number[]): LineIn
  *
  * @internal
  */
-export function tryGetSourceMappingURL(lineInfo: LineInfo) {
+export function tryGetSourceMappingURL(lineInfo: LineInfo): string | undefined {
     for (let index = lineInfo.getLineCount() - 1; index >= 0; index--) {
         const line = lineInfo.getLineText(index);
         const comment = sourceMapCommentRegExp.exec(line);
         if (comment) {
-            return trimStringEnd(comment[1]);
+            return comment[1].trimEnd();
         }
         // If we see a non-whitespace/map comment-like line, break, to avoid scanning up the entire file
         else if (!line.match(whitespaceOrMapCommentRegExp)) {
@@ -393,13 +400,12 @@ export function tryGetSourceMappingURL(lineInfo: LineInfo) {
     }
 }
 
-/* eslint-disable no-null/no-null */
+/* eslint-disable no-restricted-syntax */
 function isStringOrNull(x: any) {
     return typeof x === "string" || x === null;
 }
 
-/** @internal */
-export function isRawSourceMap(x: any): x is RawSourceMap {
+function isRawSourceMap(x: any): x is RawSourceMap {
     return x !== null
         && typeof x === "object"
         && x.version === 3
@@ -410,10 +416,10 @@ export function isRawSourceMap(x: any): x is RawSourceMap {
         && (x.sourcesContent === undefined || x.sourcesContent === null || isArray(x.sourcesContent) && every(x.sourcesContent, isStringOrNull))
         && (x.names === undefined || x.names === null || isArray(x.names) && every(x.names, isString));
 }
-/* eslint-enable no-null/no-null */
+/* eslint-enable no-restricted-syntax */
 
 /** @internal */
-export function tryParseRawSourceMap(text: string) {
+export function tryParseRawSourceMap(text: string): RawSourceMap | undefined {
     try {
         const parsed = JSON.parse(text);
         if (isRawSourceMap(parsed)) {
@@ -428,7 +434,7 @@ export function tryParseRawSourceMap(text: string) {
 }
 
 /** @internal */
-export interface MappingsDecoder extends Iterator<Mapping> {
+export interface MappingsDecoder extends IterableIterator<Mapping> {
     readonly pos: number;
     readonly error: string | undefined;
     readonly state: Required<Mapping>;
@@ -463,10 +469,17 @@ export function decodeMappings(mappings: string): MappingsDecoder {
     let nameIndex = 0;
     let error: string | undefined;
 
+    // TODO(jakebailey): can we implement this without writing next ourselves?
     return {
-        get pos() { return pos; },
-        get error() { return error; },
-        get state() { return captureMapping(/*hasSource*/ true, /*hasName*/ true); },
+        get pos() {
+            return pos;
+        },
+        get error() {
+            return error;
+        },
+        get state() {
+            return captureMapping(/*hasSource*/ true, /*hasName*/ true);
+        },
         next() {
             while (!done && pos < mappings.length) {
                 const ch = mappings.charCodeAt(pos);
@@ -522,7 +535,10 @@ export function decodeMappings(mappings: string): MappingsDecoder {
             }
 
             return stopIterating();
-        }
+        },
+        [Symbol.iterator]() {
+            return this;
+        },
     };
 
     function captureMapping(hasSource: true, hasName: true): Required<Mapping>;
@@ -534,11 +550,11 @@ export function decodeMappings(mappings: string): MappingsDecoder {
             sourceIndex: hasSource ? sourceIndex : undefined,
             sourceLine: hasSource ? sourceLine : undefined,
             sourceCharacter: hasSource ? sourceCharacter : undefined,
-            nameIndex: hasName ? nameIndex : undefined
+            nameIndex: hasName ? nameIndex : undefined,
         };
     }
 
-    function stopIterating(): { value: never, done: true } {
+    function stopIterating(): { value: never; done: true; } {
         done = true;
         return { value: undefined!, done: true };
     }
@@ -600,14 +616,14 @@ export function decodeMappings(mappings: string): MappingsDecoder {
 }
 
 /** @internal */
-export function sameMapping<T extends Mapping>(left: T, right: T) {
+export function sameMapping<T extends Mapping>(left: T, right: T): boolean {
     return left === right
         || left.generatedLine === right.generatedLine
-        && left.generatedCharacter === right.generatedCharacter
-        && left.sourceIndex === right.sourceIndex
-        && left.sourceLine === right.sourceLine
-        && left.sourceCharacter === right.sourceCharacter
-        && left.nameIndex === right.nameIndex;
+            && left.generatedCharacter === right.generatedCharacter
+            && left.sourceIndex === right.sourceIndex
+            && left.sourceLine === right.sourceLine
+            && left.sourceCharacter === right.sourceCharacter
+            && left.nameIndex === right.nameIndex;
 }
 
 /** @internal */
@@ -693,7 +709,7 @@ export function createDocumentPositionMapper(host: DocumentPositionMapperHost, m
 
     return {
         getSourcePosition,
-        getGeneratedPosition
+        getGeneratedPosition,
     };
 
     function processMapping(mapping: Mapping): MappedPosition {
@@ -714,7 +730,7 @@ export function createDocumentPositionMapper(host: DocumentPositionMapperHost, m
             source,
             sourceIndex: mapping.sourceIndex,
             sourcePosition,
-            nameIndex: mapping.nameIndex
+            nameIndex: mapping.nameIndex,
         };
     }
 
@@ -803,5 +819,5 @@ export function createDocumentPositionMapper(host: DocumentPositionMapperHost, m
 /** @internal */
 export const identitySourceMapConsumer: DocumentPositionMapper = {
     getSourcePosition: identity,
-    getGeneratedPosition: identity
+    getGeneratedPosition: identity,
 };

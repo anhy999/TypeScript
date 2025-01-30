@@ -1,87 +1,207 @@
-Info 0    [00:00:13.000] Provided types map file "/a/lib/typesMap.json" doesn't exist
-Info 1    [00:00:14.000] request:
+Info seq  [hh:mm:ss:mss] currentDirectory:: /home/src/Vscode/Projects/bin useCaseSensitiveFileNames:: false
+Info seq  [hh:mm:ss:mss] libs Location:: /home/src/tslibs/TS/Lib
+Info seq  [hh:mm:ss:mss] globalTypingsCacheLocation:: /home/src/Library/Caches/typescript
+Info seq  [hh:mm:ss:mss] Provided types map file "/home/src/tslibs/TS/Lib/typesMap.json" doesn't exist
+Before request
+//// [/user/username/projects/project/f1.ts]
+ 
+
+//// [/user/username/projects/project/f2.html]
+var hello = "hello";
+
+//// [/user/username/projects/project/tsconfig.json]
+{
+  "compilerOptions": {
+    "allowJs": true
+  }
+}
+
+//// [/home/src/tslibs/TS/Lib/lib.d.ts]
+/// <reference no-default-lib="true"/>
+interface Boolean {}
+interface Function {}
+interface CallableFunction {}
+interface NewableFunction {}
+interface IArguments {}
+interface Number { toExponential: any; }
+interface Object {}
+interface RegExp {}
+interface String { charAt: any; }
+interface Array<T> { length: number; [n: number]: T; }
+interface ReadonlyArray<T> {}
+declare const console: { log(msg: any): void; };
+
+
+Info seq  [hh:mm:ss:mss] request:
     {
       "command": "open",
       "arguments": {
-        "file": "/a/b/f1.ts"
+        "file": "/user/username/projects/project/f1.ts"
       },
       "seq": 1,
       "type": "request"
     }
-Before request
-//// [/a/b/f1.ts]
- 
-
-//// [/a/b/f2.html]
-var hello = "hello";
-
-//// [/a/b/tsconfig.json]
-{"compilerOptions":{"allowJs":true}}
-
-
-PolledWatches::
-
-FsWatches::
-
-FsWatchesRecursive::
-
-Info 2    [00:00:15.000] Search path: /a/b
-Info 3    [00:00:16.000] For info: /a/b/f1.ts :: Config file name: /a/b/tsconfig.json
-Info 4    [00:00:17.000] Creating configuration project /a/b/tsconfig.json
-Info 5    [00:00:18.000] FileWatcher:: Added:: WatchInfo: /a/b/tsconfig.json 2000 undefined Project: /a/b/tsconfig.json WatchType: Config file
-Info 6    [00:00:19.000] Config: /a/b/tsconfig.json : {
+Info seq  [hh:mm:ss:mss] getConfigFileNameForFile:: File: /user/username/projects/project/f1.ts ProjectRootPath: undefined:: Result: /user/username/projects/project/tsconfig.json
+Info seq  [hh:mm:ss:mss] Creating ConfiguredProject: /user/username/projects/project/tsconfig.json, currentDirectory: /user/username/projects/project
+Info seq  [hh:mm:ss:mss] FileWatcher:: Added:: WatchInfo: /user/username/projects/project/tsconfig.json 2000 undefined Project: /user/username/projects/project/tsconfig.json WatchType: Config file
+Info seq  [hh:mm:ss:mss] Config: /user/username/projects/project/tsconfig.json : {
  "rootNames": [
-  "/a/b/f1.ts"
+  "/user/username/projects/project/f1.ts"
  ],
  "options": {
   "allowJs": true,
-  "configFilePath": "/a/b/tsconfig.json"
+  "configFilePath": "/user/username/projects/project/tsconfig.json"
  }
 }
-Info 7    [00:00:20.000] DirectoryWatcher:: Added:: WatchInfo: /a/b 1 undefined Config: /a/b/tsconfig.json WatchType: Wild card directory
-Info 8    [00:00:21.000] Elapsed:: *ms DirectoryWatcher:: Added:: WatchInfo: /a/b 1 undefined Config: /a/b/tsconfig.json WatchType: Wild card directory
-Info 9    [00:00:22.000] Starting updateGraphWorker: Project: /a/b/tsconfig.json
-Info 10   [00:00:23.000] FileWatcher:: Added:: WatchInfo: /a/lib/lib.d.ts 500 undefined Project: /a/b/tsconfig.json WatchType: Missing file
-Info 11   [00:00:24.000] DirectoryWatcher:: Added:: WatchInfo: /a/b/node_modules/@types 1 undefined Project: /a/b/tsconfig.json WatchType: Type roots
-Info 12   [00:00:25.000] Elapsed:: *ms DirectoryWatcher:: Added:: WatchInfo: /a/b/node_modules/@types 1 undefined Project: /a/b/tsconfig.json WatchType: Type roots
-Info 13   [00:00:26.000] Finishing updateGraphWorker: Project: /a/b/tsconfig.json Version: 1 structureChanged: true structureIsReused:: Not Elapsed:: *ms
-Info 14   [00:00:27.000] Project '/a/b/tsconfig.json' (Configured)
-Info 15   [00:00:28.000] 	Files (1)
-	/a/b/f1.ts
+Info seq  [hh:mm:ss:mss] event:
+    {
+      "seq": 0,
+      "type": "event",
+      "event": "projectLoadingStart",
+      "body": {
+        "projectName": "/user/username/projects/project/tsconfig.json",
+        "reason": "Creating possible configured project for /user/username/projects/project/f1.ts to open"
+      }
+    }
+Info seq  [hh:mm:ss:mss] DirectoryWatcher:: Added:: WatchInfo: /user/username/projects/project 1 undefined Config: /user/username/projects/project/tsconfig.json WatchType: Wild card directory
+Info seq  [hh:mm:ss:mss] Elapsed:: *ms DirectoryWatcher:: Added:: WatchInfo: /user/username/projects/project 1 undefined Config: /user/username/projects/project/tsconfig.json WatchType: Wild card directory
+Info seq  [hh:mm:ss:mss] Starting updateGraphWorker: Project: /user/username/projects/project/tsconfig.json
+Info seq  [hh:mm:ss:mss] FileWatcher:: Added:: WatchInfo: /home/src/tslibs/TS/Lib/lib.d.ts 500 undefined WatchType: Closed Script info
+Info seq  [hh:mm:ss:mss] DirectoryWatcher:: Added:: WatchInfo: /user/username/projects/project/node_modules/@types 1 undefined Project: /user/username/projects/project/tsconfig.json WatchType: Type roots
+Info seq  [hh:mm:ss:mss] Elapsed:: *ms DirectoryWatcher:: Added:: WatchInfo: /user/username/projects/project/node_modules/@types 1 undefined Project: /user/username/projects/project/tsconfig.json WatchType: Type roots
+Info seq  [hh:mm:ss:mss] DirectoryWatcher:: Added:: WatchInfo: /user/username/projects/node_modules/@types 1 undefined Project: /user/username/projects/project/tsconfig.json WatchType: Type roots
+Info seq  [hh:mm:ss:mss] Elapsed:: *ms DirectoryWatcher:: Added:: WatchInfo: /user/username/projects/node_modules/@types 1 undefined Project: /user/username/projects/project/tsconfig.json WatchType: Type roots
+Info seq  [hh:mm:ss:mss] Finishing updateGraphWorker: Project: /user/username/projects/project/tsconfig.json projectStateVersion: 1 projectProgramVersion: 0 structureChanged: true structureIsReused:: Not Elapsed:: *ms
+Info seq  [hh:mm:ss:mss] Project '/user/username/projects/project/tsconfig.json' (Configured)
+Info seq  [hh:mm:ss:mss] 	Files (2)
+	/home/src/tslibs/TS/Lib/lib.d.ts Text-1 "/// <reference no-default-lib=\"true\"/>\ninterface Boolean {}\ninterface Function {}\ninterface CallableFunction {}\ninterface NewableFunction {}\ninterface IArguments {}\ninterface Number { toExponential: any; }\ninterface Object {}\ninterface RegExp {}\ninterface String { charAt: any; }\ninterface Array<T> { length: number; [n: number]: T; }\ninterface ReadonlyArray<T> {}\ndeclare const console: { log(msg: any): void; };"
+	/user/username/projects/project/f1.ts SVC-1-0 " "
 
 
+	../../../../home/src/tslibs/TS/Lib/lib.d.ts
+	  Default library for target 'es5'
 	f1.ts
 	  Matched by default include pattern '**/*'
 
-Info 16   [00:00:29.000] -----------------------------------------------
-Info 17   [00:00:30.000] Project '/a/b/tsconfig.json' (Configured)
-Info 17   [00:00:31.000] 	Files (1)
+Info seq  [hh:mm:ss:mss] -----------------------------------------------
+Info seq  [hh:mm:ss:mss] event:
+    {
+      "seq": 0,
+      "type": "event",
+      "event": "projectLoadingFinish",
+      "body": {
+        "projectName": "/user/username/projects/project/tsconfig.json"
+      }
+    }
+Info seq  [hh:mm:ss:mss] event:
+    {
+      "seq": 0,
+      "type": "event",
+      "event": "telemetry",
+      "body": {
+        "telemetryEventName": "projectInfo",
+        "payload": {
+          "projectId": "ff5803d884ff4e4485901596e00c181622d4efba4fec19a41fe48adf94ccdf94",
+          "fileStats": {
+            "js": 0,
+            "jsSize": 0,
+            "jsx": 0,
+            "jsxSize": 0,
+            "ts": 1,
+            "tsSize": 1,
+            "tsx": 0,
+            "tsxSize": 0,
+            "dts": 1,
+            "dtsSize": 413,
+            "deferred": 0,
+            "deferredSize": 0
+          },
+          "compilerOptions": {
+            "allowJs": true
+          },
+          "typeAcquisition": {
+            "enable": false,
+            "include": false,
+            "exclude": false
+          },
+          "extends": false,
+          "files": false,
+          "include": false,
+          "exclude": false,
+          "compileOnSave": false,
+          "configFileName": "tsconfig.json",
+          "projectType": "configured",
+          "languageServiceEnabled": true,
+          "version": "FakeVersion"
+        }
+      }
+    }
+Info seq  [hh:mm:ss:mss] event:
+    {
+      "seq": 0,
+      "type": "event",
+      "event": "configFileDiag",
+      "body": {
+        "triggerFile": "/user/username/projects/project/f1.ts",
+        "configFile": "/user/username/projects/project/tsconfig.json",
+        "diagnostics": []
+      }
+    }
+Info seq  [hh:mm:ss:mss] Project '/user/username/projects/project/tsconfig.json' (Configured)
+Info seq  [hh:mm:ss:mss] 	Files (2)
 
-Info 17   [00:00:32.000] -----------------------------------------------
-Info 17   [00:00:33.000] Open files: 
-Info 17   [00:00:34.000] 	FileName: /a/b/f1.ts ProjectRootPath: undefined
-Info 17   [00:00:35.000] 		Projects: /a/b/tsconfig.json
+Info seq  [hh:mm:ss:mss] -----------------------------------------------
+Info seq  [hh:mm:ss:mss] Open files: 
+Info seq  [hh:mm:ss:mss] 	FileName: /user/username/projects/project/f1.ts ProjectRootPath: undefined
+Info seq  [hh:mm:ss:mss] 		Projects: /user/username/projects/project/tsconfig.json
+Info seq  [hh:mm:ss:mss] response:
+    {
+      "seq": 0,
+      "type": "response",
+      "command": "open",
+      "request_seq": 1,
+      "success": true,
+      "performanceData": {
+        "updateGraphDurationMs": *
+      }
+    }
 After request
 
 PolledWatches::
-/a/lib/lib.d.ts:
+/user/username/projects/node_modules/@types: *new*
   {"pollingInterval":500}
-/a/b/node_modules/@types:
+/user/username/projects/project/node_modules/@types: *new*
   {"pollingInterval":500}
 
 FsWatches::
-/a/b/tsconfig.json:
+/home/src/tslibs/TS/Lib/lib.d.ts: *new*
+  {}
+/user/username/projects/project/tsconfig.json: *new*
   {}
 
 FsWatchesRecursive::
-/a/b:
+/user/username/projects/project: *new*
   {}
 
-Info 17   [00:00:36.000] response:
-    {
-      "responseRequired": false
-    }
-Info 18   [00:00:37.000] request:
+Projects::
+/user/username/projects/project/tsconfig.json (Configured) *new*
+    projectStateVersion: 1
+    projectProgramVersion: 1
+    autoImportProviderHost: false
+
+ScriptInfos::
+/home/src/tslibs/TS/Lib/lib.d.ts *new*
+    version: Text-1
+    containingProjects: 1
+        /user/username/projects/project/tsconfig.json
+/user/username/projects/project/f1.ts (Open) *new*
+    version: SVC-1-0
+    containingProjects: 1
+        /user/username/projects/project/tsconfig.json *default*
+
+Before request
+
+Info seq  [hh:mm:ss:mss] request:
     {
       "command": "configure",
       "arguments": {
@@ -96,155 +216,242 @@ Info 18   [00:00:37.000] request:
       "seq": 2,
       "type": "request"
     }
-Before request
-
-PolledWatches::
-/a/lib/lib.d.ts:
-  {"pollingInterval":500}
-/a/b/node_modules/@types:
-  {"pollingInterval":500}
-
-FsWatches::
-/a/b/tsconfig.json:
-  {}
-
-FsWatchesRecursive::
-/a/b:
-  {}
-
-Info 19   [00:00:38.000] reload projects.
-Info 20   [00:00:39.000] Search path: /a/b
-Info 21   [00:00:40.000] For info: /a/b/f1.ts :: Config file name: /a/b/tsconfig.json
-Info 22   [00:00:41.000] DirectoryWatcher:: Close:: WatchInfo: /a/b/node_modules/@types 1 undefined Project: /a/b/tsconfig.json WatchType: Type roots
-Info 23   [00:00:42.000] Elapsed:: *ms DirectoryWatcher:: Close:: WatchInfo: /a/b/node_modules/@types 1 undefined Project: /a/b/tsconfig.json WatchType: Type roots
-Info 24   [00:00:43.000] Reloading configured project /a/b/tsconfig.json
-Info 25   [00:00:44.000] Config: /a/b/tsconfig.json : {
+Info seq  [hh:mm:ss:mss] reload projects.
+Info seq  [hh:mm:ss:mss] Scheduled: /user/username/projects/project/tsconfig.json
+Info seq  [hh:mm:ss:mss] Scheduled: *ensureProjectForOpenFiles*
+Info seq  [hh:mm:ss:mss] getConfigFileNameForFile:: File: /user/username/projects/project/f1.ts ProjectRootPath: undefined:: Result: /user/username/projects/project/tsconfig.json
+Info seq  [hh:mm:ss:mss] DirectoryWatcher:: Close:: WatchInfo: /user/username/projects/project/node_modules/@types 1 undefined Project: /user/username/projects/project/tsconfig.json WatchType: Type roots
+Info seq  [hh:mm:ss:mss] Elapsed:: *ms DirectoryWatcher:: Close:: WatchInfo: /user/username/projects/project/node_modules/@types 1 undefined Project: /user/username/projects/project/tsconfig.json WatchType: Type roots
+Info seq  [hh:mm:ss:mss] DirectoryWatcher:: Close:: WatchInfo: /user/username/projects/node_modules/@types 1 undefined Project: /user/username/projects/project/tsconfig.json WatchType: Type roots
+Info seq  [hh:mm:ss:mss] Elapsed:: *ms DirectoryWatcher:: Close:: WatchInfo: /user/username/projects/node_modules/@types 1 undefined Project: /user/username/projects/project/tsconfig.json WatchType: Type roots
+Info seq  [hh:mm:ss:mss] Config: /user/username/projects/project/tsconfig.json : {
  "rootNames": [
-  "/a/b/f1.ts",
-  "/a/b/f2.html"
+  "/user/username/projects/project/f1.ts",
+  "/user/username/projects/project/f2.html"
  ],
  "options": {
   "allowJs": true,
-  "configFilePath": "/a/b/tsconfig.json"
+  "configFilePath": "/user/username/projects/project/tsconfig.json"
  }
 }
-Info 26   [00:00:45.000] Starting updateGraphWorker: Project: /a/b/tsconfig.json
-Info 27   [00:00:46.000] DirectoryWatcher:: Added:: WatchInfo: /a/b/node_modules/@types 1 undefined Project: /a/b/tsconfig.json WatchType: Type roots
-Info 28   [00:00:47.000] Elapsed:: *ms DirectoryWatcher:: Added:: WatchInfo: /a/b/node_modules/@types 1 undefined Project: /a/b/tsconfig.json WatchType: Type roots
-Info 29   [00:00:48.000] Finishing updateGraphWorker: Project: /a/b/tsconfig.json Version: 2 structureChanged: true structureIsReused:: Not Elapsed:: *ms
-Info 30   [00:00:49.000] Project '/a/b/tsconfig.json' (Configured)
-Info 31   [00:00:50.000] 	Files (2)
-	/a/b/f1.ts
-	/a/b/f2.html
+Info seq  [hh:mm:ss:mss] event:
+    {
+      "seq": 0,
+      "type": "event",
+      "event": "projectLoadingStart",
+      "body": {
+        "projectName": "/user/username/projects/project/tsconfig.json",
+        "reason": "User requested reload projects: Creating possible configured project for /user/username/projects/project/f1.ts to open"
+      }
+    }
+Info seq  [hh:mm:ss:mss] Starting updateGraphWorker: Project: /user/username/projects/project/tsconfig.json
+Info seq  [hh:mm:ss:mss] DirectoryWatcher:: Added:: WatchInfo: /user/username/projects/project/node_modules/@types 1 undefined Project: /user/username/projects/project/tsconfig.json WatchType: Type roots
+Info seq  [hh:mm:ss:mss] Elapsed:: *ms DirectoryWatcher:: Added:: WatchInfo: /user/username/projects/project/node_modules/@types 1 undefined Project: /user/username/projects/project/tsconfig.json WatchType: Type roots
+Info seq  [hh:mm:ss:mss] DirectoryWatcher:: Added:: WatchInfo: /user/username/projects/node_modules/@types 1 undefined Project: /user/username/projects/project/tsconfig.json WatchType: Type roots
+Info seq  [hh:mm:ss:mss] Elapsed:: *ms DirectoryWatcher:: Added:: WatchInfo: /user/username/projects/node_modules/@types 1 undefined Project: /user/username/projects/project/tsconfig.json WatchType: Type roots
+Info seq  [hh:mm:ss:mss] Finishing updateGraphWorker: Project: /user/username/projects/project/tsconfig.json projectStateVersion: 2 projectProgramVersion: 1 structureChanged: true structureIsReused:: Not Elapsed:: *ms
+Info seq  [hh:mm:ss:mss] Project '/user/username/projects/project/tsconfig.json' (Configured)
+Info seq  [hh:mm:ss:mss] 	Files (3)
+	/home/src/tslibs/TS/Lib/lib.d.ts Text-1 "/// <reference no-default-lib=\"true\"/>\ninterface Boolean {}\ninterface Function {}\ninterface CallableFunction {}\ninterface NewableFunction {}\ninterface IArguments {}\ninterface Number { toExponential: any; }\ninterface Object {}\ninterface RegExp {}\ninterface String { charAt: any; }\ninterface Array<T> { length: number; [n: number]: T; }\ninterface ReadonlyArray<T> {}\ndeclare const console: { log(msg: any): void; };"
+	/user/username/projects/project/f1.ts SVC-1-0 " "
+	/user/username/projects/project/f2.html Text-1 ""
 
 
+	../../../../home/src/tslibs/TS/Lib/lib.d.ts
+	  Default library for target 'es5'
 	f1.ts
 	  Matched by default include pattern '**/*'
 	f2.html
 	  Matched by default include pattern '**/*'
 
-Info 32   [00:00:51.000] -----------------------------------------------
-Info 33   [00:00:52.000] Before ensureProjectForOpenFiles:
-Info 34   [00:00:53.000] Project '/a/b/tsconfig.json' (Configured)
-Info 34   [00:00:54.000] 	Files (2)
+Info seq  [hh:mm:ss:mss] -----------------------------------------------
+Info seq  [hh:mm:ss:mss] event:
+    {
+      "seq": 0,
+      "type": "event",
+      "event": "projectLoadingFinish",
+      "body": {
+        "projectName": "/user/username/projects/project/tsconfig.json"
+      }
+    }
+Info seq  [hh:mm:ss:mss] event:
+    {
+      "seq": 0,
+      "type": "event",
+      "event": "configFileDiag",
+      "body": {
+        "triggerFile": "/user/username/projects/project/tsconfig.json",
+        "configFile": "/user/username/projects/project/tsconfig.json",
+        "diagnostics": []
+      }
+    }
+Info seq  [hh:mm:ss:mss] Before ensureProjectForOpenFiles:
+Info seq  [hh:mm:ss:mss] Project '/user/username/projects/project/tsconfig.json' (Configured)
+Info seq  [hh:mm:ss:mss] 	Files (3)
 
-Info 34   [00:00:55.000] -----------------------------------------------
-Info 34   [00:00:56.000] Open files: 
-Info 34   [00:00:57.000] 	FileName: /a/b/f1.ts ProjectRootPath: undefined
-Info 34   [00:00:58.000] 		Projects: /a/b/tsconfig.json
-Info 34   [00:00:59.000] After ensureProjectForOpenFiles:
-Info 35   [00:01:00.000] Project '/a/b/tsconfig.json' (Configured)
-Info 35   [00:01:01.000] 	Files (2)
+Info seq  [hh:mm:ss:mss] -----------------------------------------------
+Info seq  [hh:mm:ss:mss] Open files: 
+Info seq  [hh:mm:ss:mss] 	FileName: /user/username/projects/project/f1.ts ProjectRootPath: undefined
+Info seq  [hh:mm:ss:mss] 		Projects: /user/username/projects/project/tsconfig.json
+Info seq  [hh:mm:ss:mss] After ensureProjectForOpenFiles:
+Info seq  [hh:mm:ss:mss] Project '/user/username/projects/project/tsconfig.json' (Configured)
+Info seq  [hh:mm:ss:mss] 	Files (3)
 
-Info 35   [00:01:02.000] -----------------------------------------------
-Info 35   [00:01:03.000] Open files: 
-Info 35   [00:01:04.000] 	FileName: /a/b/f1.ts ProjectRootPath: undefined
-Info 35   [00:01:05.000] 		Projects: /a/b/tsconfig.json
-Info 35   [00:01:06.000] Host file extension mappings updated
-Info 36   [00:01:07.000] response:
-    {"seq":0,"type":"response","command":"configure","request_seq":2,"success":true,"performanceData":{"updateGraphDurationMs":*}}
+Info seq  [hh:mm:ss:mss] -----------------------------------------------
+Info seq  [hh:mm:ss:mss] Open files: 
+Info seq  [hh:mm:ss:mss] 	FileName: /user/username/projects/project/f1.ts ProjectRootPath: undefined
+Info seq  [hh:mm:ss:mss] 		Projects: /user/username/projects/project/tsconfig.json
+Info seq  [hh:mm:ss:mss] After reloading projects..
+Info seq  [hh:mm:ss:mss] Project '/user/username/projects/project/tsconfig.json' (Configured)
+Info seq  [hh:mm:ss:mss] 	Files (3)
+
+Info seq  [hh:mm:ss:mss] -----------------------------------------------
+Info seq  [hh:mm:ss:mss] Open files: 
+Info seq  [hh:mm:ss:mss] 	FileName: /user/username/projects/project/f1.ts ProjectRootPath: undefined
+Info seq  [hh:mm:ss:mss] 		Projects: /user/username/projects/project/tsconfig.json
+Info seq  [hh:mm:ss:mss] Host file extension mappings updated
+Info seq  [hh:mm:ss:mss] response:
+    {
+      "seq": 0,
+      "type": "response",
+      "command": "configure",
+      "request_seq": 2,
+      "success": true,
+      "performanceData": {
+        "updateGraphDurationMs": *
+      }
+    }
 After request
 
 PolledWatches::
-/a/lib/lib.d.ts:
+/user/username/projects/node_modules/@types:
+  {"pollingInterval":500} *new*
+/user/username/projects/project/node_modules/@types:
+  {"pollingInterval":500} *new*
+
+PolledWatches *deleted*::
+/user/username/projects/node_modules/@types:
   {"pollingInterval":500}
-/a/b/node_modules/@types:
+/user/username/projects/project/node_modules/@types:
   {"pollingInterval":500}
 
 FsWatches::
-/a/b/tsconfig.json:
+/home/src/tslibs/TS/Lib/lib.d.ts:
+  {}
+/user/username/projects/project/tsconfig.json:
   {}
 
 FsWatchesRecursive::
-/a/b:
+/user/username/projects/project:
   {}
 
-Info 37   [00:01:08.000] response:
-    {
-      "responseRequired": false
-    }
-Info 38   [00:01:09.000] Search path: /a/b
-Info 39   [00:01:10.000] For info: /a/b/f2.html :: Config file name: /a/b/tsconfig.json
-Info 40   [00:01:11.000] Starting updateGraphWorker: Project: /a/b/tsconfig.json
-Info 41   [00:01:12.000] Finishing updateGraphWorker: Project: /a/b/tsconfig.json Version: 3 structureChanged: false structureIsReused:: Completely Elapsed:: *ms
-Info 42   [00:01:13.000] Different program with same set of files
-Info 43   [00:01:14.000] Project '/a/b/tsconfig.json' (Configured)
-Info 43   [00:01:15.000] 	Files (2)
+Timeout callback:: count: 0
 
-Info 43   [00:01:16.000] -----------------------------------------------
-Info 43   [00:01:17.000] Open files: 
-Info 43   [00:01:18.000] 	FileName: /a/b/f1.ts ProjectRootPath: undefined
-Info 43   [00:01:19.000] 		Projects: /a/b/tsconfig.json
-Info 43   [00:01:20.000] 	FileName: /a/b/f2.html ProjectRootPath: undefined
-Info 43   [00:01:21.000] 		Projects: /a/b/tsconfig.json
-Info 43   [00:01:22.000] request:
+Projects::
+/user/username/projects/project/tsconfig.json (Configured) *changed*
+    projectStateVersion: 2 *changed*
+    projectProgramVersion: 2 *changed*
+    autoImportProviderHost: undefined *changed*
+
+ScriptInfos::
+/home/src/tslibs/TS/Lib/lib.d.ts
+    version: Text-1
+    containingProjects: 1
+        /user/username/projects/project/tsconfig.json
+/user/username/projects/project/f1.ts (Open)
+    version: SVC-1-0
+    containingProjects: 1
+        /user/username/projects/project/tsconfig.json *default*
+/user/username/projects/project/f2.html *new*
+    version: Text-1
+    containingProjects: 1
+        /user/username/projects/project/tsconfig.json
+
+Before request
+
+Info seq  [hh:mm:ss:mss] request:
     {
-      "command": "completionInfo",
+      "command": "applyChangedToOpenFiles",
       "arguments": {
-        "file": "/a/b/f1.ts",
-        "position": 1
+        "openFiles": [
+          {
+            "fileName": "/user/username/projects/project/f2.html",
+            "hasMixedContent": true,
+            "scriptKind": "JS",
+            "content": "var hello = \"hello\";"
+          }
+        ]
       },
       "seq": 3,
       "type": "request"
     }
-Before request
+Info seq  [hh:mm:ss:mss] getConfigFileNameForFile:: File: /user/username/projects/project/f2.html ProjectRootPath: undefined:: Result: /user/username/projects/project/tsconfig.json
+Info seq  [hh:mm:ss:mss] Starting updateGraphWorker: Project: /user/username/projects/project/tsconfig.json
+Info seq  [hh:mm:ss:mss] Finishing updateGraphWorker: Project: /user/username/projects/project/tsconfig.json projectStateVersion: 3 projectProgramVersion: 2 structureChanged: false structureIsReused:: Completely Elapsed:: *ms
+Info seq  [hh:mm:ss:mss] Project '/user/username/projects/project/tsconfig.json' (Configured)
+Info seq  [hh:mm:ss:mss] 	Files (3)
+	/home/src/tslibs/TS/Lib/lib.d.ts Text-1 "/// <reference no-default-lib=\"true\"/>\ninterface Boolean {}\ninterface Function {}\ninterface CallableFunction {}\ninterface NewableFunction {}\ninterface IArguments {}\ninterface Number { toExponential: any; }\ninterface Object {}\ninterface RegExp {}\ninterface String { charAt: any; }\ninterface Array<T> { length: number; [n: number]: T; }\ninterface ReadonlyArray<T> {}\ndeclare const console: { log(msg: any): void; };"
+	/user/username/projects/project/f1.ts SVC-1-0 " "
+	/user/username/projects/project/f2.html SVC-2-0 "var hello = \"hello\";"
 
-PolledWatches::
-/a/lib/lib.d.ts:
-  {"pollingInterval":500}
-/a/b/node_modules/@types:
-  {"pollingInterval":500}
+Info seq  [hh:mm:ss:mss] -----------------------------------------------
+Info seq  [hh:mm:ss:mss] Project '/user/username/projects/project/tsconfig.json' (Configured)
+Info seq  [hh:mm:ss:mss] 	Files (3)
 
-FsWatches::
-/a/b/tsconfig.json:
-  {}
-
-FsWatchesRecursive::
-/a/b:
-  {}
-
-Info 44   [00:01:23.000] getCompletionData: Get current token: *
-Info 45   [00:01:24.000] getCompletionData: Is inside comment: *
-Info 46   [00:01:25.000] getCompletionData: Get previous token: *
-Info 47   [00:01:26.000] getCompletionData: Semantic work: *
-Info 48   [00:01:27.000] getCompletionsAtPosition: getCompletionEntriesFromSymbols: *
+Info seq  [hh:mm:ss:mss] -----------------------------------------------
+Info seq  [hh:mm:ss:mss] Open files: 
+Info seq  [hh:mm:ss:mss] 	FileName: /user/username/projects/project/f1.ts ProjectRootPath: undefined
+Info seq  [hh:mm:ss:mss] 		Projects: /user/username/projects/project/tsconfig.json
+Info seq  [hh:mm:ss:mss] 	FileName: /user/username/projects/project/f2.html ProjectRootPath: undefined
+Info seq  [hh:mm:ss:mss] 		Projects: /user/username/projects/project/tsconfig.json
+Info seq  [hh:mm:ss:mss] response:
+    {
+      "response": true,
+      "responseRequired": true,
+      "performanceData": {
+        "updateGraphDurationMs": *
+      }
+    }
 After request
 
-PolledWatches::
-/a/lib/lib.d.ts:
-  {"pollingInterval":500}
-/a/b/node_modules/@types:
-  {"pollingInterval":500}
+Projects::
+/user/username/projects/project/tsconfig.json (Configured) *changed*
+    projectStateVersion: 3 *changed*
+    projectProgramVersion: 2
 
-FsWatches::
-/a/b/tsconfig.json:
-  {}
+ScriptInfos::
+/home/src/tslibs/TS/Lib/lib.d.ts
+    version: Text-1
+    containingProjects: 1
+        /user/username/projects/project/tsconfig.json
+/user/username/projects/project/f1.ts (Open)
+    version: SVC-1-0
+    containingProjects: 1
+        /user/username/projects/project/tsconfig.json *default*
+/user/username/projects/project/f2.html (Open) *changed*
+    open: true *changed*
+    version: SVC-2-0 *changed*
+    containingProjects: 1
+        /user/username/projects/project/tsconfig.json *default*
 
-FsWatchesRecursive::
-/a/b:
-  {}
+Before request
 
-Info 49   [00:01:28.000] response:
+Info seq  [hh:mm:ss:mss] request:
+    {
+      "command": "completionInfo",
+      "arguments": {
+        "file": "/user/username/projects/project/f1.ts",
+        "position": 1
+      },
+      "seq": 4,
+      "type": "request"
+    }
+Info seq  [hh:mm:ss:mss] getCompletionData: Get current token: *
+Info seq  [hh:mm:ss:mss] getCompletionData: Is inside comment: *
+Info seq  [hh:mm:ss:mss] getCompletionData: Get previous token: *
+Info seq  [hh:mm:ss:mss] getCompletionData: Semantic work: *
+Info seq  [hh:mm:ss:mss] getCompletionsAtPosition: getCompletionEntriesFromSymbols: *
+Info seq  [hh:mm:ss:mss] response:
     {
       "response": {
         "flags": 0,
@@ -322,6 +529,12 @@ Info 49   [00:01:28.000] response:
             "name": "class",
             "kind": "keyword",
             "kindModifiers": "",
+            "sortText": "15"
+          },
+          {
+            "name": "console",
+            "kind": "const",
+            "kindModifiers": "declare",
             "sortText": "15"
           },
           {
@@ -625,6 +838,12 @@ Info 49   [00:01:28.000] response:
             "sortText": "15"
           },
           {
+            "name": "using",
+            "kind": "keyword",
+            "kindModifiers": "",
+            "sortText": "15"
+          },
+          {
             "name": "var",
             "kind": "keyword",
             "kindModifiers": "",
@@ -654,68 +873,93 @@ Info 49   [00:01:28.000] response:
             "kindModifiers": "",
             "sortText": "15"
           }
+        ],
+        "defaultCommitCharacters": [
+          ".",
+          ",",
+          ";"
         ]
       },
       "responseRequired": true
     }
-Info 50   [00:01:29.000] Project '/a/b/tsconfig.json' (Configured)
-Info 50   [00:01:30.000] 	Files (2)
+After request
 
-Info 50   [00:01:31.000] -----------------------------------------------
-Info 50   [00:01:32.000] Open files: 
-Info 50   [00:01:33.000] 	FileName: /a/b/f1.ts ProjectRootPath: undefined
-Info 50   [00:01:34.000] 		Projects: /a/b/tsconfig.json
-Info 50   [00:01:35.000] request:
+Before request
+
+Info seq  [hh:mm:ss:mss] request:
+    {
+      "command": "applyChangedToOpenFiles",
+      "arguments": {
+        "closedFiles": [
+          "/user/username/projects/project/f2.html"
+        ]
+      },
+      "seq": 5,
+      "type": "request"
+    }
+Info seq  [hh:mm:ss:mss] Project '/user/username/projects/project/tsconfig.json' (Configured)
+Info seq  [hh:mm:ss:mss] 	Files (3)
+
+Info seq  [hh:mm:ss:mss] -----------------------------------------------
+Info seq  [hh:mm:ss:mss] Open files: 
+Info seq  [hh:mm:ss:mss] 	FileName: /user/username/projects/project/f1.ts ProjectRootPath: undefined
+Info seq  [hh:mm:ss:mss] 		Projects: /user/username/projects/project/tsconfig.json
+Info seq  [hh:mm:ss:mss] response:
+    {
+      "response": true,
+      "responseRequired": true
+    }
+After request
+
+Projects::
+/user/username/projects/project/tsconfig.json (Configured) *changed*
+    projectStateVersion: 4 *changed*
+    projectProgramVersion: 2
+    dirty: true *changed*
+
+ScriptInfos::
+/home/src/tslibs/TS/Lib/lib.d.ts
+    version: Text-1
+    containingProjects: 1
+        /user/username/projects/project/tsconfig.json
+/user/username/projects/project/f1.ts (Open)
+    version: SVC-1-0
+    containingProjects: 1
+        /user/username/projects/project/tsconfig.json *default*
+/user/username/projects/project/f2.html *changed*
+    open: false *changed*
+    version: SVC-2-0
+    pendingReloadFromDisk: true *changed*
+    containingProjects: 1
+        /user/username/projects/project/tsconfig.json
+
+Before request
+
+Info seq  [hh:mm:ss:mss] request:
     {
       "command": "completionInfo",
       "arguments": {
-        "file": "/a/b/f1.ts",
+        "file": "/user/username/projects/project/f1.ts",
         "position": 5
       },
-      "seq": 4,
+      "seq": 6,
       "type": "request"
     }
-Before request
+Info seq  [hh:mm:ss:mss] Starting updateGraphWorker: Project: /user/username/projects/project/tsconfig.json
+Info seq  [hh:mm:ss:mss] Finishing updateGraphWorker: Project: /user/username/projects/project/tsconfig.json projectStateVersion: 4 projectProgramVersion: 2 structureChanged: false structureIsReused:: Completely Elapsed:: *ms
+Info seq  [hh:mm:ss:mss] Project '/user/username/projects/project/tsconfig.json' (Configured)
+Info seq  [hh:mm:ss:mss] 	Files (3)
+	/home/src/tslibs/TS/Lib/lib.d.ts Text-1 "/// <reference no-default-lib=\"true\"/>\ninterface Boolean {}\ninterface Function {}\ninterface CallableFunction {}\ninterface NewableFunction {}\ninterface IArguments {}\ninterface Number { toExponential: any; }\ninterface Object {}\ninterface RegExp {}\ninterface String { charAt: any; }\ninterface Array<T> { length: number; [n: number]: T; }\ninterface ReadonlyArray<T> {}\ndeclare const console: { log(msg: any): void; };"
+	/user/username/projects/project/f1.ts SVC-1-0 " "
+	/user/username/projects/project/f2.html Text-3 ""
 
-PolledWatches::
-/a/lib/lib.d.ts:
-  {"pollingInterval":500}
-/a/b/node_modules/@types:
-  {"pollingInterval":500}
-
-FsWatches::
-/a/b/tsconfig.json:
-  {}
-
-FsWatchesRecursive::
-/a/b:
-  {}
-
-Info 51   [00:01:36.000] Starting updateGraphWorker: Project: /a/b/tsconfig.json
-Info 52   [00:01:37.000] Finishing updateGraphWorker: Project: /a/b/tsconfig.json Version: 4 structureChanged: false structureIsReused:: Completely Elapsed:: *ms
-Info 53   [00:01:38.000] Different program with same set of files
-Info 54   [00:01:39.000] getCompletionData: Get current token: *
-Info 55   [00:01:40.000] getCompletionData: Is inside comment: *
-Info 56   [00:01:41.000] getCompletionData: Get previous token: *
-Info 57   [00:01:42.000] getCompletionData: Semantic work: *
-Info 58   [00:01:43.000] getCompletionsAtPosition: getCompletionEntriesFromSymbols: *
-After request
-
-PolledWatches::
-/a/lib/lib.d.ts:
-  {"pollingInterval":500}
-/a/b/node_modules/@types:
-  {"pollingInterval":500}
-
-FsWatches::
-/a/b/tsconfig.json:
-  {}
-
-FsWatchesRecursive::
-/a/b:
-  {}
-
-Info 59   [00:01:44.000] response:
+Info seq  [hh:mm:ss:mss] -----------------------------------------------
+Info seq  [hh:mm:ss:mss] getCompletionData: Get current token: *
+Info seq  [hh:mm:ss:mss] getCompletionData: Is inside comment: *
+Info seq  [hh:mm:ss:mss] getCompletionData: Get previous token: *
+Info seq  [hh:mm:ss:mss] getCompletionData: Semantic work: *
+Info seq  [hh:mm:ss:mss] getCompletionsAtPosition: getCompletionEntriesFromSymbols: *
+Info seq  [hh:mm:ss:mss] response:
     {
       "response": {
         "flags": 0,
@@ -793,6 +1037,12 @@ Info 59   [00:01:44.000] response:
             "name": "class",
             "kind": "keyword",
             "kindModifiers": "",
+            "sortText": "15"
+          },
+          {
+            "name": "console",
+            "kind": "const",
+            "kindModifiers": "declare",
             "sortText": "15"
           },
           {
@@ -1090,6 +1340,12 @@ Info 59   [00:01:44.000] response:
             "sortText": "15"
           },
           {
+            "name": "using",
+            "kind": "keyword",
+            "kindModifiers": "",
+            "sortText": "15"
+          },
+          {
             "name": "var",
             "kind": "keyword",
             "kindModifiers": "",
@@ -1119,7 +1375,37 @@ Info 59   [00:01:44.000] response:
             "kindModifiers": "",
             "sortText": "15"
           }
+        ],
+        "defaultCommitCharacters": [
+          ".",
+          ",",
+          ";"
         ]
       },
-      "responseRequired": true
+      "responseRequired": true,
+      "performanceData": {
+        "updateGraphDurationMs": *
+      }
     }
+After request
+
+Projects::
+/user/username/projects/project/tsconfig.json (Configured) *changed*
+    projectStateVersion: 4
+    projectProgramVersion: 2
+    dirty: false *changed*
+
+ScriptInfos::
+/home/src/tslibs/TS/Lib/lib.d.ts
+    version: Text-1
+    containingProjects: 1
+        /user/username/projects/project/tsconfig.json
+/user/username/projects/project/f1.ts (Open)
+    version: SVC-1-0
+    containingProjects: 1
+        /user/username/projects/project/tsconfig.json *default*
+/user/username/projects/project/f2.html *changed*
+    version: Text-3 *changed*
+    pendingReloadFromDisk: false *changed*
+    containingProjects: 1
+        /user/username/projects/project/tsconfig.json

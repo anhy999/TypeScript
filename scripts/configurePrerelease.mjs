@@ -1,6 +1,12 @@
-import { normalize, relative } from "path";
 import assert from "assert";
-import { readFileSync, writeFileSync } from "fs";
+import {
+    readFileSync,
+    writeFileSync,
+} from "fs";
+import {
+    normalize,
+    relative,
+} from "path";
 import url from "url";
 
 const __filename = url.fileURLToPath(new URL(import.meta.url));
@@ -51,11 +57,11 @@ function main() {
     // Finally write the changes to disk.
     // Modify the package.json structure
     packageJsonValue.version = `${majorMinor}.${prereleasePatch}`;
-    writeFileSync(packageJsonFilePath, JSON.stringify(packageJsonValue, /*replacer:*/ undefined, /*space:*/ 4));
+    writeFileSync(packageJsonFilePath, JSON.stringify(packageJsonValue, undefined, 4));
     writeFileSync(tsFilePath, modifiedTsFileContents);
 }
 
-/* eslint-disable no-null/no-null */
+/* eslint-disable no-restricted-syntax */
 /**
  * @param {string} tsFilePath
  * @param {string} tsFileContents
@@ -87,12 +93,12 @@ function updateTsFile(tsFilePath, tsFileContents, majorMinor, patch, nightlyPatc
  * @returns {{ majorMinor: string, patch: string }}
  */
 function parsePackageJsonVersion(versionString) {
-    const versionRgx = /(\d+\.\d+)\.(\d+)($|\-)/;
+    const versionRgx = /(\d+\.\d+)\.(\d+)($|-)/;
     const match = versionString.match(versionRgx);
     assert(match !== null, "package.json 'version' should match " + versionRgx.toString());
     return { majorMinor: match[1], patch: match[2] };
 }
-/* eslint-enable no-null/no-null */
+/* eslint-enable no-restricted-syntax */
 
 /**
  * e.g. 0-dev.20170707
@@ -106,7 +112,7 @@ function getPrereleasePatch(tag, plainPatch) {
     // but we'd prefer to just remove separators and limit ourselves to YYYYMMDD.
     // UTC time will always be implicit here.
     const now = new Date();
-    const timeStr = now.toISOString().replace(/:|T|\.|-/g, "").slice(0, 8);
+    const timeStr = now.toISOString().replace(/[:T.-]/g, "").slice(0, 8);
 
     return `${plainPatch}-${tag}.${timeStr}`;
 }

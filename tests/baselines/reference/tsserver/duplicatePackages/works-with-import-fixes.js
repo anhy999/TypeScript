@@ -1,81 +1,115 @@
-Info 0    [00:00:29.000] Provided types map file "/a/lib/typesMap.json" doesn't exist
-Info 1    [00:00:30.000] request:
+Info seq  [hh:mm:ss:mss] currentDirectory:: /home/src/Vscode/Projects/bin useCaseSensitiveFileNames:: false
+Info seq  [hh:mm:ss:mss] libs Location:: /home/src/tslibs/TS/Lib
+Info seq  [hh:mm:ss:mss] globalTypingsCacheLocation:: /home/src/Library/Caches/typescript
+Info seq  [hh:mm:ss:mss] Provided types map file "/home/src/tslibs/TS/Lib/typesMap.json" doesn't exist
+Before request
+//// [/home/src/projects/project/a/node_modules/foo/index.d.ts]
+export const foo: number;
+
+//// [/home/src/projects/project/a/node_modules/foo/package.json]
+{
+  "name": "foo",
+  "version": "1.2.3"
+}
+
+//// [/home/src/projects/project/b/node_modules/foo/index.d.ts]
+export const foo: number;
+
+//// [/home/src/projects/project/b/node_modules/foo/package.json]
+{
+  "name": "foo",
+  "version": "1.2.3"
+}
+
+//// [/home/src/projects/project/a/user.ts]
+import("foo");
+foo
+
+//// [/home/src/projects/project/b/user.ts]
+import("foo");
+foo
+
+//// [/home/src/projects/project/tsconfig.json]
+{}
+
+//// [/home/src/tslibs/TS/Lib/lib.d.ts]
+/// <reference no-default-lib="true"/>
+interface Boolean {}
+interface Function {}
+interface CallableFunction {}
+interface NewableFunction {}
+interface IArguments {}
+interface Number { toExponential: any; }
+interface Object {}
+interface RegExp {}
+interface String { charAt: any; }
+interface Array<T> { length: number; [n: number]: T; }
+interface ReadonlyArray<T> {}
+declare const console: { log(msg: any): void; };
+
+
+Info seq  [hh:mm:ss:mss] request:
     {
       "command": "open",
       "arguments": {
-        "file": "/a/user.ts"
+        "file": "/home/src/projects/project/a/user.ts"
       },
       "seq": 1,
       "type": "request"
     }
-Before request
-//// [/a/node_modules/foo/index.d.ts]
-export const foo: number;
-
-//// [/a/node_modules/foo/package.json]
-{"name":"foo","version":"1.2.3"}
-
-//// [/b/node_modules/foo/index.d.ts]
-export const foo: number;
-
-//// [/b/node_modules/foo/package.json]
-{"name":"foo","version":"1.2.3"}
-
-//// [/a/user.ts]
-import("foo");
-foo
-
-//// [/b/user.ts]
-import("foo");
-foo
-
-//// [/tsconfig.json]
-{}
-
-
-PolledWatches::
-
-FsWatches::
-
-FsWatchesRecursive::
-
-Info 2    [00:00:31.000] Search path: /a
-Info 3    [00:00:32.000] For info: /a/user.ts :: Config file name: /tsconfig.json
-Info 4    [00:00:33.000] Creating configuration project /tsconfig.json
-Info 5    [00:00:34.000] FileWatcher:: Added:: WatchInfo: /tsconfig.json 2000 undefined Project: /tsconfig.json WatchType: Config file
-Info 6    [00:00:35.000] Config: /tsconfig.json : {
+Info seq  [hh:mm:ss:mss] getConfigFileNameForFile:: File: /home/src/projects/project/a/user.ts ProjectRootPath: undefined:: Result: /home/src/projects/project/tsconfig.json
+Info seq  [hh:mm:ss:mss] Creating ConfiguredProject: /home/src/projects/project/tsconfig.json, currentDirectory: /home/src/projects/project
+Info seq  [hh:mm:ss:mss] FileWatcher:: Added:: WatchInfo: /home/src/projects/project/tsconfig.json 2000 undefined Project: /home/src/projects/project/tsconfig.json WatchType: Config file
+Info seq  [hh:mm:ss:mss] Config: /home/src/projects/project/tsconfig.json : {
  "rootNames": [
-  "/a/user.ts",
-  "/b/user.ts"
+  "/home/src/projects/project/a/user.ts",
+  "/home/src/projects/project/b/user.ts"
  ],
  "options": {
-  "configFilePath": "/tsconfig.json"
+  "configFilePath": "/home/src/projects/project/tsconfig.json"
  }
 }
-Info 7    [00:00:36.000] DirectoryWatcher:: Added:: WatchInfo:  1 undefined Config: /tsconfig.json WatchType: Wild card directory
-Info 8    [00:00:37.000] Elapsed:: *ms DirectoryWatcher:: Added:: WatchInfo:  1 undefined Config: /tsconfig.json WatchType: Wild card directory
-Info 9    [00:00:38.000] FileWatcher:: Added:: WatchInfo: /b/user.ts 500 undefined WatchType: Closed Script info
-Info 10   [00:00:39.000] Starting updateGraphWorker: Project: /tsconfig.json
-Info 11   [00:00:40.000] DirectoryWatcher:: Added:: WatchInfo: /a/node_modules 1 undefined WatchType: node_modules for closed script infos and package.jsons affecting module specifier cache
-Info 12   [00:00:41.000] Elapsed:: *ms DirectoryWatcher:: Added:: WatchInfo: /a/node_modules 1 undefined WatchType: node_modules for closed script infos and package.jsons affecting module specifier cache
-Info 13   [00:00:42.000] DirectoryWatcher:: Added:: WatchInfo: /b/node_modules 1 undefined WatchType: node_modules for closed script infos and package.jsons affecting module specifier cache
-Info 14   [00:00:43.000] Elapsed:: *ms DirectoryWatcher:: Added:: WatchInfo: /b/node_modules 1 undefined WatchType: node_modules for closed script infos and package.jsons affecting module specifier cache
-Info 15   [00:00:44.000] DirectoryWatcher:: Added:: WatchInfo: /a 1 undefined Project: /tsconfig.json WatchType: Failed Lookup Locations
-Info 16   [00:00:45.000] Elapsed:: *ms DirectoryWatcher:: Added:: WatchInfo: /a 1 undefined Project: /tsconfig.json WatchType: Failed Lookup Locations
-Info 17   [00:00:46.000] FileWatcher:: Added:: WatchInfo: /a/node_modules/foo/package.json 2000 undefined Project: /tsconfig.json WatchType: File location affecting resolution
-Info 18   [00:00:47.000] DirectoryWatcher:: Added:: WatchInfo: /b 1 undefined Project: /tsconfig.json WatchType: Failed Lookup Locations
-Info 19   [00:00:48.000] Elapsed:: *ms DirectoryWatcher:: Added:: WatchInfo: /b 1 undefined Project: /tsconfig.json WatchType: Failed Lookup Locations
-Info 20   [00:00:49.000] FileWatcher:: Added:: WatchInfo: /b/node_modules/foo/package.json 2000 undefined Project: /tsconfig.json WatchType: File location affecting resolution
-Info 21   [00:00:50.000] FileWatcher:: Added:: WatchInfo: /a/lib/lib.d.ts 500 undefined Project: /tsconfig.json WatchType: Missing file
-Info 22   [00:00:51.000] Finishing updateGraphWorker: Project: /tsconfig.json Version: 1 structureChanged: true structureIsReused:: Not Elapsed:: *ms
-Info 23   [00:00:52.000] Project '/tsconfig.json' (Configured)
-Info 24   [00:00:53.000] 	Files (4)
-	/a/node_modules/foo/index.d.ts
-	/a/user.ts
-	/b/node_modules/foo/index.d.ts
-	/b/user.ts
+Info seq  [hh:mm:ss:mss] event:
+    {
+      "seq": 0,
+      "type": "event",
+      "event": "projectLoadingStart",
+      "body": {
+        "projectName": "/home/src/projects/project/tsconfig.json",
+        "reason": "Creating possible configured project for /home/src/projects/project/a/user.ts to open"
+      }
+    }
+Info seq  [hh:mm:ss:mss] DirectoryWatcher:: Added:: WatchInfo: /home/src/projects/project 1 undefined Config: /home/src/projects/project/tsconfig.json WatchType: Wild card directory
+Info seq  [hh:mm:ss:mss] Elapsed:: *ms DirectoryWatcher:: Added:: WatchInfo: /home/src/projects/project 1 undefined Config: /home/src/projects/project/tsconfig.json WatchType: Wild card directory
+Info seq  [hh:mm:ss:mss] FileWatcher:: Added:: WatchInfo: /home/src/projects/project/b/user.ts 500 undefined WatchType: Closed Script info
+Info seq  [hh:mm:ss:mss] Starting updateGraphWorker: Project: /home/src/projects/project/tsconfig.json
+Info seq  [hh:mm:ss:mss] DirectoryWatcher:: Added:: WatchInfo: /home/src/projects/project/a/node_modules 1 undefined WatchType: node_modules for closed script infos and package.jsons affecting module specifier cache
+Info seq  [hh:mm:ss:mss] Elapsed:: *ms DirectoryWatcher:: Added:: WatchInfo: /home/src/projects/project/a/node_modules 1 undefined WatchType: node_modules for closed script infos and package.jsons affecting module specifier cache
+Info seq  [hh:mm:ss:mss] DirectoryWatcher:: Added:: WatchInfo: /home/src/projects/project/b/node_modules 1 undefined WatchType: node_modules for closed script infos and package.jsons affecting module specifier cache
+Info seq  [hh:mm:ss:mss] Elapsed:: *ms DirectoryWatcher:: Added:: WatchInfo: /home/src/projects/project/b/node_modules 1 undefined WatchType: node_modules for closed script infos and package.jsons affecting module specifier cache
+Info seq  [hh:mm:ss:mss] FileWatcher:: Added:: WatchInfo: /home/src/tslibs/TS/Lib/lib.d.ts 500 undefined WatchType: Closed Script info
+Info seq  [hh:mm:ss:mss] DirectoryWatcher:: Added:: WatchInfo: /home/src/projects/project/a 1 undefined Project: /home/src/projects/project/tsconfig.json WatchType: Failed Lookup Locations
+Info seq  [hh:mm:ss:mss] Elapsed:: *ms DirectoryWatcher:: Added:: WatchInfo: /home/src/projects/project/a 1 undefined Project: /home/src/projects/project/tsconfig.json WatchType: Failed Lookup Locations
+Info seq  [hh:mm:ss:mss] FileWatcher:: Added:: WatchInfo: /home/src/projects/project/a/node_modules/foo/package.json 2000 undefined Project: /home/src/projects/project/tsconfig.json WatchType: File location affecting resolution
+Info seq  [hh:mm:ss:mss] DirectoryWatcher:: Added:: WatchInfo: /home/src/projects/project/b 1 undefined Project: /home/src/projects/project/tsconfig.json WatchType: Failed Lookup Locations
+Info seq  [hh:mm:ss:mss] Elapsed:: *ms DirectoryWatcher:: Added:: WatchInfo: /home/src/projects/project/b 1 undefined Project: /home/src/projects/project/tsconfig.json WatchType: Failed Lookup Locations
+Info seq  [hh:mm:ss:mss] FileWatcher:: Added:: WatchInfo: /home/src/projects/project/b/node_modules/foo/package.json 2000 undefined Project: /home/src/projects/project/tsconfig.json WatchType: File location affecting resolution
+Info seq  [hh:mm:ss:mss] DirectoryWatcher:: Added:: WatchInfo: /home/src/projects/project/node_modules/@types 1 undefined Project: /home/src/projects/project/tsconfig.json WatchType: Type roots
+Info seq  [hh:mm:ss:mss] Elapsed:: *ms DirectoryWatcher:: Added:: WatchInfo: /home/src/projects/project/node_modules/@types 1 undefined Project: /home/src/projects/project/tsconfig.json WatchType: Type roots
+Info seq  [hh:mm:ss:mss] DirectoryWatcher:: Added:: WatchInfo: /home/src/projects/node_modules/@types 1 undefined Project: /home/src/projects/project/tsconfig.json WatchType: Type roots
+Info seq  [hh:mm:ss:mss] Elapsed:: *ms DirectoryWatcher:: Added:: WatchInfo: /home/src/projects/node_modules/@types 1 undefined Project: /home/src/projects/project/tsconfig.json WatchType: Type roots
+Info seq  [hh:mm:ss:mss] Finishing updateGraphWorker: Project: /home/src/projects/project/tsconfig.json projectStateVersion: 1 projectProgramVersion: 0 structureChanged: true structureIsReused:: Not Elapsed:: *ms
+Info seq  [hh:mm:ss:mss] Project '/home/src/projects/project/tsconfig.json' (Configured)
+Info seq  [hh:mm:ss:mss] 	Files (5)
+	/home/src/tslibs/TS/Lib/lib.d.ts Text-1 "/// <reference no-default-lib=\"true\"/>\ninterface Boolean {}\ninterface Function {}\ninterface CallableFunction {}\ninterface NewableFunction {}\ninterface IArguments {}\ninterface Number { toExponential: any; }\ninterface Object {}\ninterface RegExp {}\ninterface String { charAt: any; }\ninterface Array<T> { length: number; [n: number]: T; }\ninterface ReadonlyArray<T> {}\ndeclare const console: { log(msg: any): void; };"
+	/home/src/projects/project/a/node_modules/foo/index.d.ts Text-1 "export const foo: number;"
+	/home/src/projects/project/a/user.ts SVC-1-0 "import(\"foo\");\nfoo"
+	/home/src/projects/project/b/node_modules/foo/index.d.ts Text-1 "export const foo: number;"
+	/home/src/projects/project/b/user.ts Text-1 "import(\"foo\");\nfoo"
 
 
+	../../tslibs/TS/Lib/lib.d.ts
+	  Default library for target 'es5'
 	a/node_modules/foo/index.d.ts
 	  Imported via "foo" from file 'a/user.ts' with packageId 'foo/index.d.ts@1.2.3'
 	a/user.ts
@@ -86,130 +120,240 @@ Info 24   [00:00:53.000] 	Files (4)
 	b/user.ts
 	  Matched by default include pattern '**/*'
 
-Info 25   [00:00:54.000] -----------------------------------------------
-Info 26   [00:00:55.000] Project '/tsconfig.json' (Configured)
-Info 26   [00:00:56.000] 	Files (4)
+Info seq  [hh:mm:ss:mss] -----------------------------------------------
+Info seq  [hh:mm:ss:mss] event:
+    {
+      "seq": 0,
+      "type": "event",
+      "event": "projectLoadingFinish",
+      "body": {
+        "projectName": "/home/src/projects/project/tsconfig.json"
+      }
+    }
+Info seq  [hh:mm:ss:mss] event:
+    {
+      "seq": 0,
+      "type": "event",
+      "event": "telemetry",
+      "body": {
+        "telemetryEventName": "projectInfo",
+        "payload": {
+          "projectId": "1097a5f82e8323ba7aba7567ec06402f7ad4ea74abce44ec5efd223ac77ff169",
+          "fileStats": {
+            "js": 0,
+            "jsSize": 0,
+            "jsx": 0,
+            "jsxSize": 0,
+            "ts": 2,
+            "tsSize": 36,
+            "tsx": 0,
+            "tsxSize": 0,
+            "dts": 3,
+            "dtsSize": 463,
+            "deferred": 0,
+            "deferredSize": 0
+          },
+          "compilerOptions": {},
+          "typeAcquisition": {
+            "enable": false,
+            "include": false,
+            "exclude": false
+          },
+          "extends": false,
+          "files": false,
+          "include": false,
+          "exclude": false,
+          "compileOnSave": false,
+          "configFileName": "tsconfig.json",
+          "projectType": "configured",
+          "languageServiceEnabled": true,
+          "version": "FakeVersion"
+        }
+      }
+    }
+Info seq  [hh:mm:ss:mss] event:
+    {
+      "seq": 0,
+      "type": "event",
+      "event": "configFileDiag",
+      "body": {
+        "triggerFile": "/home/src/projects/project/a/user.ts",
+        "configFile": "/home/src/projects/project/tsconfig.json",
+        "diagnostics": []
+      }
+    }
+Info seq  [hh:mm:ss:mss] Project '/home/src/projects/project/tsconfig.json' (Configured)
+Info seq  [hh:mm:ss:mss] 	Files (5)
 
-Info 26   [00:00:57.000] -----------------------------------------------
-Info 26   [00:00:58.000] Open files: 
-Info 26   [00:00:59.000] 	FileName: /a/user.ts ProjectRootPath: undefined
-Info 26   [00:01:00.000] 		Projects: /tsconfig.json
+Info seq  [hh:mm:ss:mss] -----------------------------------------------
+Info seq  [hh:mm:ss:mss] Open files: 
+Info seq  [hh:mm:ss:mss] 	FileName: /home/src/projects/project/a/user.ts ProjectRootPath: undefined
+Info seq  [hh:mm:ss:mss] 		Projects: /home/src/projects/project/tsconfig.json
+Info seq  [hh:mm:ss:mss] response:
+    {
+      "seq": 0,
+      "type": "response",
+      "command": "open",
+      "request_seq": 1,
+      "success": true,
+      "performanceData": {
+        "updateGraphDurationMs": *
+      }
+    }
 After request
 
 PolledWatches::
-/a/lib/lib.d.ts:
+/home/src/projects/node_modules/@types: *new*
+  {"pollingInterval":500}
+/home/src/projects/project/node_modules/@types: *new*
   {"pollingInterval":500}
 
 FsWatches::
-/tsconfig.json:
+/home/src/projects/project/a/node_modules/foo/package.json: *new*
   {}
-/b/user.ts:
+/home/src/projects/project/b/node_modules/foo/package.json: *new*
   {}
-/a/node_modules/foo/package.json:
+/home/src/projects/project/b/user.ts: *new*
   {}
-/b/node_modules/foo/package.json:
+/home/src/projects/project/tsconfig.json: *new*
+  {}
+/home/src/tslibs/TS/Lib/lib.d.ts: *new*
   {}
 
 FsWatchesRecursive::
-/:
+/home/src/projects/project: *new*
   {}
-/a/node_modules:
+/home/src/projects/project/a: *new*
   {}
-/b/node_modules:
+/home/src/projects/project/a/node_modules: *new*
   {}
-/a:
+/home/src/projects/project/b: *new*
   {}
-/b:
+/home/src/projects/project/b/node_modules: *new*
   {}
 
-Info 26   [00:01:01.000] response:
-    {
-      "responseRequired": false
-    }
-Info 27   [00:01:02.000] request:
+Projects::
+/home/src/projects/project/tsconfig.json (Configured) *new*
+    projectStateVersion: 1
+    projectProgramVersion: 1
+    autoImportProviderHost: false
+
+ScriptInfos::
+/home/src/projects/project/a/node_modules/foo/index.d.ts *new*
+    version: Text-1
+    containingProjects: 1
+        /home/src/projects/project/tsconfig.json
+/home/src/projects/project/a/user.ts (Open) *new*
+    version: SVC-1-0
+    containingProjects: 1
+        /home/src/projects/project/tsconfig.json *default*
+/home/src/projects/project/b/node_modules/foo/index.d.ts *new*
+    version: Text-1
+    containingProjects: 1
+        /home/src/projects/project/tsconfig.json
+/home/src/projects/project/b/user.ts *new*
+    version: Text-1
+    containingProjects: 1
+        /home/src/projects/project/tsconfig.json
+/home/src/tslibs/TS/Lib/lib.d.ts *new*
+    version: Text-1
+    containingProjects: 1
+        /home/src/projects/project/tsconfig.json
+
+Before request
+
+Info seq  [hh:mm:ss:mss] request:
     {
       "command": "open",
       "arguments": {
-        "file": "/b/user.ts"
+        "file": "/home/src/projects/project/b/user.ts"
       },
       "seq": 2,
       "type": "request"
     }
-Before request
+Info seq  [hh:mm:ss:mss] FileWatcher:: Close:: WatchInfo: /home/src/projects/project/b/user.ts 500 undefined WatchType: Closed Script info
+Info seq  [hh:mm:ss:mss] getConfigFileNameForFile:: File: /home/src/projects/project/b/user.ts ProjectRootPath: undefined:: Result: /home/src/projects/project/tsconfig.json
+Info seq  [hh:mm:ss:mss] Project '/home/src/projects/project/tsconfig.json' (Configured)
+Info seq  [hh:mm:ss:mss] 	Files (5)
 
-PolledWatches::
-/a/lib/lib.d.ts:
-  {"pollingInterval":500}
-
-FsWatches::
-/tsconfig.json:
-  {}
-/b/user.ts:
-  {}
-/a/node_modules/foo/package.json:
-  {}
-/b/node_modules/foo/package.json:
-  {}
-
-FsWatchesRecursive::
-/:
-  {}
-/a/node_modules:
-  {}
-/b/node_modules:
-  {}
-/a:
-  {}
-/b:
-  {}
-
-Info 28   [00:01:03.000] FileWatcher:: Close:: WatchInfo: /b/user.ts 500 undefined WatchType: Closed Script info
-Info 29   [00:01:04.000] Search path: /b
-Info 30   [00:01:05.000] For info: /b/user.ts :: Config file name: /tsconfig.json
-Info 31   [00:01:06.000] Project '/tsconfig.json' (Configured)
-Info 31   [00:01:07.000] 	Files (4)
-
-Info 31   [00:01:08.000] -----------------------------------------------
-Info 31   [00:01:09.000] Open files: 
-Info 31   [00:01:10.000] 	FileName: /a/user.ts ProjectRootPath: undefined
-Info 31   [00:01:11.000] 		Projects: /tsconfig.json
-Info 31   [00:01:12.000] 	FileName: /b/user.ts ProjectRootPath: undefined
-Info 31   [00:01:13.000] 		Projects: /tsconfig.json
+Info seq  [hh:mm:ss:mss] -----------------------------------------------
+Info seq  [hh:mm:ss:mss] Open files: 
+Info seq  [hh:mm:ss:mss] 	FileName: /home/src/projects/project/a/user.ts ProjectRootPath: undefined
+Info seq  [hh:mm:ss:mss] 		Projects: /home/src/projects/project/tsconfig.json
+Info seq  [hh:mm:ss:mss] 	FileName: /home/src/projects/project/b/user.ts ProjectRootPath: undefined
+Info seq  [hh:mm:ss:mss] 		Projects: /home/src/projects/project/tsconfig.json
+Info seq  [hh:mm:ss:mss] response:
+    {
+      "seq": 0,
+      "type": "response",
+      "command": "open",
+      "request_seq": 2,
+      "success": true
+    }
 After request
 
 PolledWatches::
-/a/lib/lib.d.ts:
+/home/src/projects/node_modules/@types:
+  {"pollingInterval":500}
+/home/src/projects/project/node_modules/@types:
   {"pollingInterval":500}
 
 FsWatches::
-/tsconfig.json:
+/home/src/projects/project/a/node_modules/foo/package.json:
   {}
-/a/node_modules/foo/package.json:
+/home/src/projects/project/b/node_modules/foo/package.json:
   {}
-/b/node_modules/foo/package.json:
+/home/src/projects/project/tsconfig.json:
+  {}
+/home/src/tslibs/TS/Lib/lib.d.ts:
+  {}
+
+FsWatches *deleted*::
+/home/src/projects/project/b/user.ts:
   {}
 
 FsWatchesRecursive::
-/:
+/home/src/projects/project:
   {}
-/a/node_modules:
+/home/src/projects/project/a:
   {}
-/b/node_modules:
+/home/src/projects/project/a/node_modules:
   {}
-/a:
+/home/src/projects/project/b:
   {}
-/b:
+/home/src/projects/project/b/node_modules:
   {}
 
-Info 31   [00:01:14.000] response:
-    {
-      "responseRequired": false
-    }
-Info 32   [00:01:15.000] request:
+ScriptInfos::
+/home/src/projects/project/a/node_modules/foo/index.d.ts
+    version: Text-1
+    containingProjects: 1
+        /home/src/projects/project/tsconfig.json
+/home/src/projects/project/a/user.ts (Open)
+    version: SVC-1-0
+    containingProjects: 1
+        /home/src/projects/project/tsconfig.json *default*
+/home/src/projects/project/b/node_modules/foo/index.d.ts
+    version: Text-1
+    containingProjects: 1
+        /home/src/projects/project/tsconfig.json
+/home/src/projects/project/b/user.ts (Open) *changed*
+    open: true *changed*
+    version: Text-1
+    containingProjects: 1
+        /home/src/projects/project/tsconfig.json *default*
+/home/src/tslibs/TS/Lib/lib.d.ts
+    version: Text-1
+    containingProjects: 1
+        /home/src/projects/project/tsconfig.json
+
+Before request
+
+Info seq  [hh:mm:ss:mss] request:
     {
       "command": "getCodeFixes",
       "arguments": {
-        "file": "/a/user.ts",
+        "file": "/home/src/projects/project/a/user.ts",
         "startLine": 2,
         "startOffset": 1,
         "endLine": 2,
@@ -221,59 +365,7 @@ Info 32   [00:01:15.000] request:
       "seq": 3,
       "type": "request"
     }
-Before request
-
-PolledWatches::
-/a/lib/lib.d.ts:
-  {"pollingInterval":500}
-
-FsWatches::
-/tsconfig.json:
-  {}
-/a/node_modules/foo/package.json:
-  {}
-/b/node_modules/foo/package.json:
-  {}
-
-FsWatchesRecursive::
-/:
-  {}
-/a/node_modules:
-  {}
-/b/node_modules:
-  {}
-/a:
-  {}
-/b:
-  {}
-
-After request
-
-PolledWatches::
-/a/lib/lib.d.ts:
-  {"pollingInterval":500}
-
-FsWatches::
-/tsconfig.json:
-  {}
-/a/node_modules/foo/package.json:
-  {}
-/b/node_modules/foo/package.json:
-  {}
-
-FsWatchesRecursive::
-/:
-  {}
-/a/node_modules:
-  {}
-/b/node_modules:
-  {}
-/a:
-  {}
-/b:
-  {}
-
-Info 33   [00:01:16.000] response:
+Info seq  [hh:mm:ss:mss] response:
     {
       "response": [
         {
@@ -281,7 +373,7 @@ Info 33   [00:01:16.000] response:
           "description": "Add import from \"foo\"",
           "changes": [
             {
-              "fileName": "/a/user.ts",
+              "fileName": "/home/src/projects/project/a/user.ts",
               "textChanges": [
                 {
                   "start": {
@@ -301,11 +393,15 @@ Info 33   [00:01:16.000] response:
       ],
       "responseRequired": true
     }
-Info 34   [00:01:17.000] request:
+After request
+
+Before request
+
+Info seq  [hh:mm:ss:mss] request:
     {
       "command": "getCodeFixes",
       "arguments": {
-        "file": "/b/user.ts",
+        "file": "/home/src/projects/project/b/user.ts",
         "startLine": 2,
         "startOffset": 1,
         "endLine": 2,
@@ -317,59 +413,7 @@ Info 34   [00:01:17.000] request:
       "seq": 4,
       "type": "request"
     }
-Before request
-
-PolledWatches::
-/a/lib/lib.d.ts:
-  {"pollingInterval":500}
-
-FsWatches::
-/tsconfig.json:
-  {}
-/a/node_modules/foo/package.json:
-  {}
-/b/node_modules/foo/package.json:
-  {}
-
-FsWatchesRecursive::
-/:
-  {}
-/a/node_modules:
-  {}
-/b/node_modules:
-  {}
-/a:
-  {}
-/b:
-  {}
-
-After request
-
-PolledWatches::
-/a/lib/lib.d.ts:
-  {"pollingInterval":500}
-
-FsWatches::
-/tsconfig.json:
-  {}
-/a/node_modules/foo/package.json:
-  {}
-/b/node_modules/foo/package.json:
-  {}
-
-FsWatchesRecursive::
-/:
-  {}
-/a/node_modules:
-  {}
-/b/node_modules:
-  {}
-/a:
-  {}
-/b:
-  {}
-
-Info 35   [00:01:18.000] response:
+Info seq  [hh:mm:ss:mss] response:
     {
       "response": [
         {
@@ -377,7 +421,7 @@ Info 35   [00:01:18.000] response:
           "description": "Add import from \"foo\"",
           "changes": [
             {
-              "fileName": "/b/user.ts",
+              "fileName": "/home/src/projects/project/b/user.ts",
               "textChanges": [
                 {
                   "start": {
@@ -397,3 +441,4 @@ Info 35   [00:01:18.000] response:
       ],
       "responseRequired": true
     }
+After request

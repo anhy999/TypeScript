@@ -1,104 +1,136 @@
-Info 0    [00:00:07.000] Provided types map file "/a/lib/typesMap.json" doesn't exist
-Info 1    [00:00:08.000] request:
+Info seq  [hh:mm:ss:mss] currentDirectory:: /home/src/Vscode/Projects/bin useCaseSensitiveFileNames:: false
+Info seq  [hh:mm:ss:mss] libs Location:: /home/src/tslibs/TS/Lib
+Info seq  [hh:mm:ss:mss] globalTypingsCacheLocation:: /home/src/Library/Caches/typescript
+Info seq  [hh:mm:ss:mss] Provided types map file "/home/src/tslibs/TS/Lib/typesMap.json" doesn't exist
+Before request
+//// [/home/src/projects/project/a.ts]
+export const a = 0;
+
+//// [/home/src/projects/project/b.ts]
+import { a } from "./a";
+
+//// [/home/src/tslibs/TS/Lib/lib.d.ts]
+/// <reference no-default-lib="true"/>
+interface Boolean {}
+interface Function {}
+interface CallableFunction {}
+interface NewableFunction {}
+interface IArguments {}
+interface Number { toExponential: any; }
+interface Object {}
+interface RegExp {}
+interface String { charAt: any; }
+interface Array<T> { length: number; [n: number]: T; }
+interface ReadonlyArray<T> {}
+declare const console: { log(msg: any): void; };
+
+
+Info seq  [hh:mm:ss:mss] request:
     {
       "command": "open",
       "arguments": {
-        "file": "/b.ts"
+        "file": "/home/src/projects/project/b.ts"
       },
       "seq": 1,
       "type": "request"
     }
-Before request
-//// [/a.ts]
-export const a = 0;
-
-//// [/b.ts]
-import { a } from "./a";
-
-
-PolledWatches::
-
-FsWatches::
-
-FsWatchesRecursive::
-
-Info 2    [00:00:09.000] Search path: /
-Info 3    [00:00:10.000] For info: /b.ts :: No config files found.
-Info 4    [00:00:11.000] Starting updateGraphWorker: Project: /dev/null/inferredProject1*
-Info 5    [00:00:12.000] FileWatcher:: Added:: WatchInfo: /a.ts 500 undefined WatchType: Closed Script info
-Info 6    [00:00:13.000] FileWatcher:: Added:: WatchInfo: /a/lib/lib.d.ts 500 undefined Project: /dev/null/inferredProject1* WatchType: Missing file
-Info 7    [00:00:14.000] Finishing updateGraphWorker: Project: /dev/null/inferredProject1* Version: 1 structureChanged: true structureIsReused:: Not Elapsed:: *ms
-Info 8    [00:00:15.000] Project '/dev/null/inferredProject1*' (Inferred)
-Info 9    [00:00:16.000] 	Files (2)
-	/a.ts
-	/b.ts
+Info seq  [hh:mm:ss:mss] getConfigFileNameForFile:: File: /home/src/projects/project/b.ts ProjectRootPath: undefined:: Result: undefined
+Info seq  [hh:mm:ss:mss] Creating InferredProject: /dev/null/inferredProject1*, currentDirectory: /home/src/projects/project
+Info seq  [hh:mm:ss:mss] FileWatcher:: Added:: WatchInfo: /home/src/projects/project/tsconfig.json 2000 undefined WatchType: Config file for the inferred project root
+Info seq  [hh:mm:ss:mss] FileWatcher:: Added:: WatchInfo: /home/src/projects/project/jsconfig.json 2000 undefined WatchType: Config file for the inferred project root
+Info seq  [hh:mm:ss:mss] Starting updateGraphWorker: Project: /dev/null/inferredProject1*
+Info seq  [hh:mm:ss:mss] FileWatcher:: Added:: WatchInfo: /home/src/projects/project/a.ts 500 undefined WatchType: Closed Script info
+Info seq  [hh:mm:ss:mss] FileWatcher:: Added:: WatchInfo: /home/src/tslibs/TS/Lib/lib.d.ts 500 undefined WatchType: Closed Script info
+Info seq  [hh:mm:ss:mss] DirectoryWatcher:: Added:: WatchInfo: /home/src/projects/project/node_modules/@types 1 undefined Project: /dev/null/inferredProject1* WatchType: Type roots
+Info seq  [hh:mm:ss:mss] Elapsed:: *ms DirectoryWatcher:: Added:: WatchInfo: /home/src/projects/project/node_modules/@types 1 undefined Project: /dev/null/inferredProject1* WatchType: Type roots
+Info seq  [hh:mm:ss:mss] DirectoryWatcher:: Added:: WatchInfo: /home/src/projects/node_modules/@types 1 undefined Project: /dev/null/inferredProject1* WatchType: Type roots
+Info seq  [hh:mm:ss:mss] Elapsed:: *ms DirectoryWatcher:: Added:: WatchInfo: /home/src/projects/node_modules/@types 1 undefined Project: /dev/null/inferredProject1* WatchType: Type roots
+Info seq  [hh:mm:ss:mss] Finishing updateGraphWorker: Project: /dev/null/inferredProject1* projectStateVersion: 1 projectProgramVersion: 0 structureChanged: true structureIsReused:: Not Elapsed:: *ms
+Info seq  [hh:mm:ss:mss] Project '/dev/null/inferredProject1*' (Inferred)
+Info seq  [hh:mm:ss:mss] 	Files (3)
+	/home/src/tslibs/TS/Lib/lib.d.ts Text-1 "/// <reference no-default-lib=\"true\"/>\ninterface Boolean {}\ninterface Function {}\ninterface CallableFunction {}\ninterface NewableFunction {}\ninterface IArguments {}\ninterface Number { toExponential: any; }\ninterface Object {}\ninterface RegExp {}\ninterface String { charAt: any; }\ninterface Array<T> { length: number; [n: number]: T; }\ninterface ReadonlyArray<T> {}\ndeclare const console: { log(msg: any): void; };"
+	/home/src/projects/project/a.ts Text-1 "export const a = 0;"
+	/home/src/projects/project/b.ts SVC-1-0 "import { a } from \"./a\";"
 
 
+	../../tslibs/TS/Lib/lib.d.ts
+	  Default library for target 'es5'
 	a.ts
 	  Imported via "./a" from file 'b.ts'
 	b.ts
 	  Root file specified for compilation
 
-Info 10   [00:00:17.000] -----------------------------------------------
-Info 11   [00:00:18.000] Project '/dev/null/inferredProject1*' (Inferred)
-Info 11   [00:00:19.000] 	Files (2)
+Info seq  [hh:mm:ss:mss] -----------------------------------------------
+Info seq  [hh:mm:ss:mss] Project '/dev/null/inferredProject1*' (Inferred)
+Info seq  [hh:mm:ss:mss] 	Files (3)
 
-Info 11   [00:00:20.000] -----------------------------------------------
-Info 11   [00:00:21.000] Open files: 
-Info 11   [00:00:22.000] 	FileName: /b.ts ProjectRootPath: undefined
-Info 11   [00:00:23.000] 		Projects: /dev/null/inferredProject1*
+Info seq  [hh:mm:ss:mss] -----------------------------------------------
+Info seq  [hh:mm:ss:mss] Open files: 
+Info seq  [hh:mm:ss:mss] 	FileName: /home/src/projects/project/b.ts ProjectRootPath: undefined
+Info seq  [hh:mm:ss:mss] 		Projects: /dev/null/inferredProject1*
+Info seq  [hh:mm:ss:mss] response:
+    {
+      "seq": 0,
+      "type": "response",
+      "command": "open",
+      "request_seq": 1,
+      "success": true,
+      "performanceData": {
+        "updateGraphDurationMs": *
+      }
+    }
 After request
 
 PolledWatches::
-/a/lib/lib.d.ts:
+/home/src/projects/node_modules/@types: *new*
   {"pollingInterval":500}
+/home/src/projects/project/jsconfig.json: *new*
+  {"pollingInterval":2000}
+/home/src/projects/project/node_modules/@types: *new*
+  {"pollingInterval":500}
+/home/src/projects/project/tsconfig.json: *new*
+  {"pollingInterval":2000}
 
 FsWatches::
-/a.ts:
+/home/src/projects/project/a.ts: *new*
+  {}
+/home/src/tslibs/TS/Lib/lib.d.ts: *new*
   {}
 
-FsWatchesRecursive::
+Projects::
+/dev/null/inferredProject1* (Inferred) *new*
+    projectStateVersion: 1
+    projectProgramVersion: 1
+    autoImportProviderHost: false
 
-Info 11   [00:00:24.000] response:
-    {
-      "responseRequired": false
-    }
-Info 12   [00:00:25.000] request:
+ScriptInfos::
+/home/src/projects/project/a.ts *new*
+    version: Text-1
+    containingProjects: 1
+        /dev/null/inferredProject1*
+/home/src/projects/project/b.ts (Open) *new*
+    version: SVC-1-0
+    containingProjects: 1
+        /dev/null/inferredProject1* *default*
+/home/src/tslibs/TS/Lib/lib.d.ts *new*
+    version: Text-1
+    containingProjects: 1
+        /dev/null/inferredProject1*
+
+Before request
+
+Info seq  [hh:mm:ss:mss] request:
     {
       "command": "rename",
       "arguments": {
-        "file": "/b.ts",
+        "file": "/home/src/projects/project/b.ts",
         "line": 1,
         "offset": 22
       },
       "seq": 2,
       "type": "request"
     }
-Before request
-
-PolledWatches::
-/a/lib/lib.d.ts:
-  {"pollingInterval":500}
-
-FsWatches::
-/a.ts:
-  {}
-
-FsWatchesRecursive::
-
-After request
-
-PolledWatches::
-/a/lib/lib.d.ts:
-  {"pollingInterval":500}
-
-FsWatches::
-/a.ts:
-  {}
-
-FsWatchesRecursive::
-
-Info 13   [00:00:26.000] response:
+Info seq  [hh:mm:ss:mss] response:
     {
       "response": {
         "info": {
@@ -109,7 +141,11 @@ Info 13   [00:00:26.000] response:
       },
       "responseRequired": true
     }
-Info 14   [00:00:27.000] request:
+After request
+
+Before request
+
+Info seq  [hh:mm:ss:mss] request:
     {
       "command": "configure",
       "arguments": {
@@ -120,79 +156,37 @@ Info 14   [00:00:27.000] request:
       "seq": 3,
       "type": "request"
     }
-Before request
-
-PolledWatches::
-/a/lib/lib.d.ts:
-  {"pollingInterval":500}
-
-FsWatches::
-/a.ts:
-  {}
-
-FsWatchesRecursive::
-
-Info 15   [00:00:28.000] response:
-    {"seq":0,"type":"response","command":"configure","request_seq":3,"success":true,"performanceData":{"updateGraphDurationMs":*}}
+Info seq  [hh:mm:ss:mss] response:
+    {
+      "seq": 0,
+      "type": "response",
+      "command": "configure",
+      "request_seq": 3,
+      "success": true
+    }
 After request
 
-PolledWatches::
-/a/lib/lib.d.ts:
-  {"pollingInterval":500}
+Before request
 
-FsWatches::
-/a.ts:
-  {}
-
-FsWatchesRecursive::
-
-Info 16   [00:00:29.000] response:
-    {
-      "responseRequired": false
-    }
-Info 17   [00:00:30.000] request:
+Info seq  [hh:mm:ss:mss] request:
     {
       "command": "rename",
       "arguments": {
-        "file": "/b.ts",
+        "file": "/home/src/projects/project/b.ts",
         "line": 1,
         "offset": 22
       },
       "seq": 4,
       "type": "request"
     }
-Before request
-
-PolledWatches::
-/a/lib/lib.d.ts:
-  {"pollingInterval":500}
-
-FsWatches::
-/a.ts:
-  {}
-
-FsWatchesRecursive::
-
-After request
-
-PolledWatches::
-/a/lib/lib.d.ts:
-  {"pollingInterval":500}
-
-FsWatches::
-/a.ts:
-  {}
-
-FsWatchesRecursive::
-
-Info 18   [00:00:31.000] response:
+Info seq  [hh:mm:ss:mss] response:
     {
       "response": {
         "info": {
           "canRename": true,
-          "fileToRename": "/a.ts",
-          "displayName": "/a.ts",
-          "fullDisplayName": "/a.ts",
+          "fileToRename": "/home/src/projects/project/a.ts",
+          "displayName": "/home/src/projects/project/a.ts",
+          "fullDisplayName": "./a",
           "kind": "module",
           "kindModifiers": "",
           "triggerSpan": {
@@ -208,7 +202,7 @@ Info 18   [00:00:31.000] response:
         },
         "locs": [
           {
-            "file": "/b.ts",
+            "file": "/home/src/projects/project/b.ts",
             "locs": [
               {
                 "start": {
@@ -234,7 +228,11 @@ Info 18   [00:00:31.000] response:
       },
       "responseRequired": true
     }
-Info 19   [00:00:32.000] request:
+After request
+
+Before request
+
+Info seq  [hh:mm:ss:mss] request:
     {
       "command": "configure",
       "arguments": {
@@ -245,41 +243,23 @@ Info 19   [00:00:32.000] request:
       "seq": 5,
       "type": "request"
     }
-Before request
-
-PolledWatches::
-/a/lib/lib.d.ts:
-  {"pollingInterval":500}
-
-FsWatches::
-/a.ts:
-  {}
-
-FsWatchesRecursive::
-
-Info 20   [00:00:33.000] response:
-    {"seq":0,"type":"response","command":"configure","request_seq":5,"success":true,"performanceData":{"updateGraphDurationMs":*}}
+Info seq  [hh:mm:ss:mss] response:
+    {
+      "seq": 0,
+      "type": "response",
+      "command": "configure",
+      "request_seq": 5,
+      "success": true
+    }
 After request
 
-PolledWatches::
-/a/lib/lib.d.ts:
-  {"pollingInterval":500}
+Before request
 
-FsWatches::
-/a.ts:
-  {}
-
-FsWatchesRecursive::
-
-Info 21   [00:00:34.000] response:
-    {
-      "responseRequired": false
-    }
-Info 22   [00:00:35.000] request:
+Info seq  [hh:mm:ss:mss] request:
     {
       "command": "configure",
       "arguments": {
-        "file": "/b.ts",
+        "file": "/home/src/projects/project/b.ts",
         "formatOptions": {},
         "preferences": {
           "allowRenameOfImportPath": true
@@ -288,80 +268,38 @@ Info 22   [00:00:35.000] request:
       "seq": 6,
       "type": "request"
     }
-Before request
-
-PolledWatches::
-/a/lib/lib.d.ts:
-  {"pollingInterval":500}
-
-FsWatches::
-/a.ts:
-  {}
-
-FsWatchesRecursive::
-
-Info 23   [00:00:36.000] Host configuration update for file /b.ts
-Info 24   [00:00:37.000] response:
-    {"seq":0,"type":"response","command":"configure","request_seq":6,"success":true,"performanceData":{"updateGraphDurationMs":*}}
+Info seq  [hh:mm:ss:mss] Host configuration update for file /home/src/projects/project/b.ts
+Info seq  [hh:mm:ss:mss] response:
+    {
+      "seq": 0,
+      "type": "response",
+      "command": "configure",
+      "request_seq": 6,
+      "success": true
+    }
 After request
 
-PolledWatches::
-/a/lib/lib.d.ts:
-  {"pollingInterval":500}
+Before request
 
-FsWatches::
-/a.ts:
-  {}
-
-FsWatchesRecursive::
-
-Info 25   [00:00:38.000] response:
-    {
-      "responseRequired": false
-    }
-Info 26   [00:00:39.000] request:
+Info seq  [hh:mm:ss:mss] request:
     {
       "command": "rename",
       "arguments": {
-        "file": "/b.ts",
+        "file": "/home/src/projects/project/b.ts",
         "line": 1,
         "offset": 22
       },
       "seq": 7,
       "type": "request"
     }
-Before request
-
-PolledWatches::
-/a/lib/lib.d.ts:
-  {"pollingInterval":500}
-
-FsWatches::
-/a.ts:
-  {}
-
-FsWatchesRecursive::
-
-After request
-
-PolledWatches::
-/a/lib/lib.d.ts:
-  {"pollingInterval":500}
-
-FsWatches::
-/a.ts:
-  {}
-
-FsWatchesRecursive::
-
-Info 27   [00:00:40.000] response:
+Info seq  [hh:mm:ss:mss] response:
     {
       "response": {
         "info": {
           "canRename": true,
-          "fileToRename": "/a.ts",
-          "displayName": "/a.ts",
-          "fullDisplayName": "/a.ts",
+          "fileToRename": "/home/src/projects/project/a.ts",
+          "displayName": "/home/src/projects/project/a.ts",
+          "fullDisplayName": "./a",
           "kind": "module",
           "kindModifiers": "",
           "triggerSpan": {
@@ -377,7 +315,7 @@ Info 27   [00:00:40.000] response:
         },
         "locs": [
           {
-            "file": "/b.ts",
+            "file": "/home/src/projects/project/b.ts",
             "locs": [
               {
                 "start": {
@@ -403,3 +341,4 @@ Info 27   [00:00:40.000] response:
       },
       "responseRequired": true
     }
+After request

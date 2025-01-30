@@ -1,13 +1,7 @@
-Info 0    [00:00:31.000] Provided types map file "/a/lib/typesMap.json" doesn't exist
-Info 1    [00:00:40.000] request:
-    {
-      "command": "open",
-      "arguments": {
-        "file": "/user/username/projects/myproject/a.ts"
-      },
-      "seq": 1,
-      "type": "request"
-    }
+Info seq  [hh:mm:ss:mss] currentDirectory:: /home/src/Vscode/Projects/bin useCaseSensitiveFileNames:: false
+Info seq  [hh:mm:ss:mss] libs Location:: /home/src/tslibs/TS/Lib
+Info seq  [hh:mm:ss:mss] globalTypingsCacheLocation:: /home/src/Library/Caches/typescript
+Info seq  [hh:mm:ss:mss] Provided types map file "/home/src/tslibs/TS/Lib/typesMap.json" doesn't exist
 Before request
 //// [/user/username/projects/myproject/a.ts]
 import { y, cc } from "./b";
@@ -25,7 +19,10 @@ export const cc = 10;
 //// [/user/username/projects/myproject/node_modules/something/index.d.ts]
 export const something = 10;
 
-//// [/a/lib/lib.d.ts]
+//// [/user/username/projects/myproject/tsconfig.json]
+{}
+
+//// [/home/src/tslibs/TS/Lib/lib.d.ts]
 /// <reference no-default-lib="true"/>
 interface Boolean {}
 interface Function {}
@@ -37,42 +34,53 @@ interface Object {}
 interface RegExp {}
 interface String { charAt: any; }
 interface Array<T> { length: number; [n: number]: T; }
+interface ReadonlyArray<T> {}
+declare const console: { log(msg: any): void; };
 
-//// [/user/username/projects/myproject/tsconfig.json]
-{}
-
-//// [/node_modules/@types/somemodule/index.d.ts]
+//// [/user/username/projects/myproject/node_modules/@types/somemodule/index.d.ts]
 export const something = 10;
 
 
-PolledWatches::
+Info seq  [hh:mm:ss:mss] request:
+    {
+      "command": "open",
+      "arguments": {
+        "file": "/user/username/projects/myproject/a.ts"
+      },
+      "seq": 1,
+      "type": "request"
+    }
+Info seq  [hh:mm:ss:mss] Creating InferredProject: /dev/null/inferredProject1*, currentDirectory: /home/src/Vscode/Projects/bin
+Info seq  [hh:mm:ss:mss] Starting updateGraphWorker: Project: /dev/null/inferredProject1*
+Info seq  [hh:mm:ss:mss] Finishing updateGraphWorker: Project: /dev/null/inferredProject1* projectStateVersion: 1 projectProgramVersion: 0 structureChanged: false Elapsed:: *ms
+Info seq  [hh:mm:ss:mss] Same program as before
+Info seq  [hh:mm:ss:mss] Project '/dev/null/inferredProject1*' (Inferred)
+Info seq  [hh:mm:ss:mss] 	Files (0) NoProgram
 
-FsWatches::
-
-FsWatchesRecursive::
-
-Info 2    [00:00:41.000] Starting updateGraphWorker: Project: /dev/null/inferredProject1*
-Info 3    [00:00:42.000] Finishing updateGraphWorker: Project: /dev/null/inferredProject1* Version: 1 structureChanged: false Elapsed:: *ms
-Info 4    [00:00:43.000] Project '/dev/null/inferredProject1*' (Inferred)
-Info 5    [00:00:44.000] 	Files (0) NoProgram
-
-Info 6    [00:00:45.000] -----------------------------------------------
-Info 7    [00:00:46.000] Project '/dev/null/inferredProject1*' (Inferred)
-Info 7    [00:00:47.000] 	Files (0) NoProgram
-
-Info 7    [00:00:48.000] -----------------------------------------------
-Info 7    [00:00:49.000] Open files: 
-Info 7    [00:00:50.000] 	FileName: /user/username/projects/myproject/a.ts ProjectRootPath: undefined
-Info 7    [00:00:51.000] 		Projects: /dev/null/inferredProject1*
+Info seq  [hh:mm:ss:mss] -----------------------------------------------
+Info seq  [hh:mm:ss:mss] Open files: 
+Info seq  [hh:mm:ss:mss] 	FileName: /user/username/projects/myproject/a.ts ProjectRootPath: undefined
+Info seq  [hh:mm:ss:mss] 		Projects: /dev/null/inferredProject1*
+Info seq  [hh:mm:ss:mss] response:
+    {
+      "seq": 0,
+      "type": "response",
+      "command": "open",
+      "request_seq": 1,
+      "success": true,
+      "performanceData": {
+        "updateGraphDurationMs": *
+      }
+    }
 After request
 
-PolledWatches::
+Projects::
+/dev/null/inferredProject1* (Inferred) *new*
+    projectStateVersion: 1
+    projectProgramVersion: 0
 
-FsWatches::
-
-FsWatchesRecursive::
-
-Info 7    [00:00:52.000] response:
-    {
-      "responseRequired": false
-    }
+ScriptInfos::
+/user/username/projects/myproject/a.ts (Open) *new*
+    version: Text-0
+    containingProjects: 1
+        /dev/null/inferredProject1* *default*

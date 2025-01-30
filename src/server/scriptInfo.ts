@@ -1,21 +1,4 @@
 import {
-    AbsolutePositionAndLineText,
-    ConfiguredProject,
-    Errors,
-    ExternalProject,
-    InferredProject,
-    isConfiguredProject,
-    isExternalProject,
-    isInferredProject,
-    maxFileSize,
-    NormalizedPath,
-    Project,
-    ProjectKind,
-    protocol,
-    ScriptVersionCache,
-    ServerHost,
-} from "./_namespaces/ts.server";
-import {
     assign,
     clear,
     closeFileWatcherOf,
@@ -42,25 +25,37 @@ import {
     IScriptSnapshot,
     isString,
     LineInfo,
+    missingFileModifiedTime,
+    orderedRemoveItem,
     Path,
     ScriptKind,
     ScriptSnapshot,
     some,
     SourceFile,
     SourceFileLike,
-    stringContains,
     TextSpan,
-    unorderedRemoveItem,
-} from "./_namespaces/ts";
-
-export interface ScriptInfoVersion {
-    svc: number;
-    text: number;
-}
+} from "./_namespaces/ts.js";
+import {
+    AbsolutePositionAndLineText,
+    ConfiguredProject,
+    Errors,
+    InferredProject,
+    isBackgroundProject,
+    isConfiguredProject,
+    isExternalProject,
+    isInferredProject,
+    isProjectDeferredClose,
+    maxFileSize,
+    NormalizedPath,
+    Project,
+    ScriptVersionCache,
+    ServerHost,
+} from "./_namespaces/ts.server.js";
+import * as protocol from "./protocol.js";
 
 /** @internal */
 export class TextStorage {
-    version: ScriptInfoVersion;
+    version: number;
 
     /**
      * Generated only on demand (based on edits, or information requested)
@@ -74,6 +69,7 @@ export class TextStorage {
      * Only on edits to the script version cache, the text will be set to undefined
      */
     private text: string | undefined;
+    private textSnapshot: IScriptSnapshot | undefined;
     /**
      * Line map for the text when there is no script version cache present
      */
@@ -98,24 +94,20 @@ export class TextStorage {
     /**
      * True when reloading contents of file from the disk is pending
      */
-    private pendingReloadFromDisk = false;
+    pendingReloadFromDisk = false;
 
-    constructor(private readonly host: ServerHost, private readonly info: ScriptInfo, initialVersion?: ScriptInfoVersion) {
-        this.version = initialVersion || { svc: 0, text: 0 };
+    constructor(private readonly host: ServerHost, private readonly info: ScriptInfo, initialVersion?: number) {
+        this.version = initialVersion || 0;
     }
 
-    public getVersion() {
+    public getVersion(): string {
         return this.svc
-            ? `SVC-${this.version.svc}-${this.svc.getSnapshotVersion()}`
-            : `Text-${this.version.text}`;
+            ? `SVC-${this.version}-${this.svc.getSnapshotVersion()}`
+            : `Text-${this.version}`;
     }
 
-    public hasScriptVersionCache_TestOnly() {
+    public hasScriptVersionCache_TestOnly(): boolean {
         return this.svc !== undefined;
-    }
-
-    public useScriptVersionCache_TestOnly() {
-        this.switchToScriptVersionCache();
     }
 
     private resetSourceMapInfo() {
@@ -128,19 +120,21 @@ export class TextStorage {
     }
 
     /** Public for testing */
-    public useText(newText?: string) {
+    public useText(newText: string): void {
         this.svc = undefined;
         this.text = newText;
+        this.textSnapshot = undefined;
         this.lineMap = undefined;
         this.fileSize = undefined;
         this.resetSourceMapInfo();
-        this.version.text++;
+        this.version++;
     }
 
-    public edit(start: number, end: number, newText: string) {
+    public edit(start: number, end: number, newText: string): void {
         this.switchToScriptVersionCache().edit(start, end - start, newText);
         this.ownFileText = false;
         this.text = undefined;
+        this.textSnapshot = undefined;
         this.lineMap = undefined;
         this.fileSize = undefined;
         this.resetSourceMapInfo();
@@ -161,7 +155,12 @@ export class TextStorage {
         // we are switching back to text.
         // The change to version cache will happen when needed
         // Thus avoiding the computation if there are no changes
+        if (!this.text && this.svc) {
+            // Ensure we have text representing current state
+            this.text = getSnapshotText(this.svc.getSnapshot());
+        }
         if (this.text !== newText) {
+            // Update the text
             this.useText(newText);
             // We cant guarantee new text is own file text
             this.ownFileText = false;
@@ -175,26 +174,35 @@ export class TextStorage {
      * Reads the contents from tempFile(if supplied) or own file and sets it as contents
      * returns true if text changed
      */
-    public reloadWithFileText(tempFileName?: string) {
-        const { text: newText, fileSize } = this.getFileTextAndSize(tempFileName);
+    public reloadWithFileText(tempFileName?: string): boolean {
+        const { text: newText, fileSize } = tempFileName || !this.info.isDynamicOrHasMixedContent() ?
+            this.getFileTextAndSize(tempFileName) :
+            { text: "", fileSize: undefined };
         const reloaded = this.reload(newText);
         this.fileSize = fileSize; // NB: after reload since reload clears it
         this.ownFileText = !tempFileName || tempFileName === this.info.fileName;
+        // In case we update this text before mTime gets updated to present file modified time
+        // because its schedule to do that later, update the mTime so we dont re-update the text
+        // Eg. with npm ci where file gets created and editor calls say get error request before
+        // the timeout to update the file stamps in node_modules is run
+        // Test:: watching npm install in codespaces where workspaces folder is hosted at root
+        if (this.ownFileText && this.info.mTime === missingFileModifiedTime.getTime()) {
+            this.info.mTime = (this.host.getModifiedTime!(this.info.fileName) || missingFileModifiedTime).getTime();
+        }
         return reloaded;
     }
 
     /**
-     * Reloads the contents from the file if there is no pending reload from disk or the contents of file are same as file text
-     * returns true if text changed
+     * Schedule reload from the disk if its not already scheduled and its not own text
+     * returns true when scheduling reload
      */
-    public reloadFromDisk() {
-        if (!this.pendingReloadFromDisk && !this.ownFileText) {
-            return this.reloadWithFileText();
-        }
-        return false;
+    public scheduleReloadIfNeeded(): boolean {
+        return !this.pendingReloadFromDisk && !this.ownFileText ?
+            this.pendingReloadFromDisk = true :
+            false;
     }
 
-    public delayReloadFromFileIntoText() {
+    public delayReloadFromFileIntoText(): void {
         this.pendingReloadFromDisk = true;
     }
 
@@ -209,32 +217,41 @@ export class TextStorage {
         return !!this.fileSize
             ? this.fileSize
             : !!this.text // Check text before svc because its length is cheaper
-                ? this.text.length // Could be wrong if this.pendingReloadFromDisk
-                : !!this.svc
-                    ? this.svc.getSnapshot().getLength() // Could be wrong if this.pendingReloadFromDisk
-                    : this.getSnapshot().getLength(); // Should be strictly correct
+            ? this.text.length // Could be wrong if this.pendingReloadFromDisk
+            : !!this.svc
+            ? this.svc.getSnapshot().getLength() // Could be wrong if this.pendingReloadFromDisk
+            : this.getSnapshot().getLength(); // Should be strictly correct
     }
 
     public getSnapshot(): IScriptSnapshot {
-        return this.useScriptVersionCacheIfValidOrOpen()
-            ? this.svc!.getSnapshot()
-            : ScriptSnapshot.fromString(this.getOrLoadText());
+        return this.tryUseScriptVersionCache()?.getSnapshot() ||
+            (this.textSnapshot ??= ScriptSnapshot.fromString(Debug.checkDefined(this.text)));
     }
 
-    public getAbsolutePositionAndLineText(line: number): AbsolutePositionAndLineText {
-        return this.switchToScriptVersionCache().getAbsolutePositionAndLineText(line);
+    public getAbsolutePositionAndLineText(oneBasedLine: number): AbsolutePositionAndLineText {
+        const svc = this.tryUseScriptVersionCache();
+        if (svc) return svc.getAbsolutePositionAndLineText(oneBasedLine);
+        const lineMap = this.getLineMap();
+        return oneBasedLine <= lineMap.length ?
+            {
+                absolutePosition: lineMap[oneBasedLine - 1],
+                lineText: this.text!.substring(lineMap[oneBasedLine - 1], lineMap[oneBasedLine]),
+            } :
+            {
+                absolutePosition: this.text!.length,
+                lineText: undefined,
+            };
     }
     /**
      *  @param line 0 based index
      */
     lineToTextSpan(line: number): TextSpan {
-        if (!this.useScriptVersionCacheIfValidOrOpen()) {
-            const lineMap = this.getLineMap();
-            const start = lineMap[line]; // -1 since line is 1-based
-            const end = line + 1 < lineMap.length ? lineMap[line + 1] : this.text!.length;
-            return createTextSpanFromBounds(start, end);
-        }
-        return this.svc!.lineToTextSpan(line);
+        const svc = this.tryUseScriptVersionCache();
+        if (svc) return svc.lineToTextSpan(line);
+        const lineMap = this.getLineMap();
+        const start = lineMap[line]; // -1 since line is 1-based
+        const end = line + 1 < lineMap.length ? lineMap[line + 1] : this.text!.length;
+        return createTextSpanFromBounds(start, end);
     }
 
     /**
@@ -242,23 +259,20 @@ export class TextStorage {
      * @param offset 1 based index
      */
     lineOffsetToPosition(line: number, offset: number, allowEdits?: true): number {
-        if (!this.useScriptVersionCacheIfValidOrOpen()) {
-            return computePositionOfLineAndCharacter(this.getLineMap(), line - 1, offset - 1, this.text, allowEdits);
-        }
-
-        // TODO: assert this offset is actually on the line
-        return this.svc!.lineOffsetToPosition(line, offset);
+        const svc = this.tryUseScriptVersionCache();
+        return svc ?
+            svc.lineOffsetToPosition(line, offset) :
+            computePositionOfLineAndCharacter(this.getLineMap(), line - 1, offset - 1, this.text, allowEdits);
     }
 
     positionToLineOffset(position: number): protocol.Location {
-        if (!this.useScriptVersionCacheIfValidOrOpen()) {
-            const { line, character } = computeLineAndCharacterOfPosition(this.getLineMap(), position);
-            return { line: line + 1, offset: character + 1 };
-        }
-        return this.svc!.positionToLineOffset(position);
+        const svc = this.tryUseScriptVersionCache();
+        if (svc) return svc.positionToLineOffset(position);
+        const { line, character } = computeLineAndCharacterOfPosition(this.getLineMap(), position);
+        return { line: line + 1, offset: character + 1 };
     }
 
-    private getFileTextAndSize(tempFileName?: string): { text: string, fileSize?: number } {
+    private getFileTextAndSize(tempFileName?: string): { text: string; fileSize?: number; } {
         let text: string;
         const fileName = tempFileName || this.info.fileName;
         const getText = () => text === undefined ? (text = this.host.readFile(fileName) || "") : text;
@@ -276,23 +290,29 @@ export class TextStorage {
         return { text: getText() };
     }
 
-    private switchToScriptVersionCache(): ScriptVersionCache {
+    /** @internal */
+    switchToScriptVersionCache(): ScriptVersionCache {
         if (!this.svc || this.pendingReloadFromDisk) {
             this.svc = ScriptVersionCache.fromString(this.getOrLoadText());
-            this.version.svc++;
+            this.textSnapshot = undefined;
+            this.version++;
         }
         return this.svc;
     }
 
-    private useScriptVersionCacheIfValidOrOpen(): ScriptVersionCache | undefined {
-        // If this is open script, use the cache
-        if (this.isOpen) {
-            return this.switchToScriptVersionCache();
+    private tryUseScriptVersionCache(): ScriptVersionCache | undefined {
+        if (!this.svc || this.pendingReloadFromDisk) {
+            // Ensure updated text
+            this.getOrLoadText();
         }
 
-        // If there is pending reload from the disk then, reload the text
-        if (this.pendingReloadFromDisk) {
-            this.reloadWithFileText();
+        // If this is open script, use the cache
+        if (this.isOpen) {
+            if (!this.svc && !this.textSnapshot) {
+                this.svc = ScriptVersionCache.fromString(Debug.checkDefined(this.text));
+                this.textSnapshot = undefined;
+            }
+            return this.svc;
         }
 
         // At this point if svc is present it's valid
@@ -309,14 +329,15 @@ export class TextStorage {
 
     private getLineMap() {
         Debug.assert(!this.svc, "ScriptVersionCache should not be set");
-        return this.lineMap || (this.lineMap = computeLineStarts(this.getOrLoadText()));
+        return this.lineMap || (this.lineMap = computeLineStarts(Debug.checkDefined(this.text)));
     }
 
     getLineInfo(): LineInfo {
-        if (this.svc) {
+        const svc = this.tryUseScriptVersionCache();
+        if (svc) {
             return {
-                getLineCount: () => this.svc!.getLineCount(),
-                getLineText: line => this.svc!.getAbsolutePositionAndLineText(line + 1).lineText!
+                getLineCount: () => svc.getLineCount(),
+                getLineText: line => svc.getAbsolutePositionAndLineText(line + 1).lineText!,
             };
         }
         const lineMap = this.getLineMap();
@@ -324,11 +345,11 @@ export class TextStorage {
     }
 }
 
-export function isDynamicFileName(fileName: NormalizedPath) {
+export function isDynamicFileName(fileName: NormalizedPath): boolean {
     return fileName[0] === "^" ||
-        ((stringContains(fileName, "walkThroughSnippet:/") || stringContains(fileName, "untitled:/")) &&
+        ((fileName.includes("walkThroughSnippet:/") || fileName.includes("untitled:/")) &&
             getBaseFileName(fileName)[0] === "^") ||
-        (stringContains(fileName, ":^") && !stringContains(fileName, directorySeparator));
+        (fileName.includes(":^") && !fileName.includes(directorySeparator));
 }
 
 /** @internal */
@@ -353,15 +374,14 @@ export class ScriptInfo {
 
     /** @internal */
     fileWatcher: FileWatcher | undefined;
-    private textStorage: TextStorage;
+    /** @internal */
+    readonly textStorage: TextStorage;
 
     /** @internal */
     readonly isDynamic: boolean;
 
     /**
      * Set to real path if path is different from info.path
-     *
-     * @internal
      */
     private realpath: Path | undefined;
 
@@ -385,18 +405,21 @@ export class ScriptInfo {
     /** @internal */
     documentPositionMapper?: DocumentPositionMapper | false;
 
+    /** @internal */
+    deferredDelete?: boolean;
+
     constructor(
         private readonly host: ServerHost,
         readonly fileName: NormalizedPath,
         readonly scriptKind: ScriptKind,
         public readonly hasMixedContent: boolean,
         readonly path: Path,
-        initialVersion?: ScriptInfoVersion) {
+        initialVersion?: number,
+    ) {
         this.isDynamic = isDynamicFileName(fileName);
 
         this.textStorage = new TextStorage(host, this, initialVersion);
         if (hasMixedContent || this.isDynamic) {
-            this.textStorage.reload("");
             this.realpath = this.path;
         }
         this.scriptKind = scriptKind
@@ -405,46 +428,33 @@ export class ScriptInfo {
     }
 
     /** @internal */
-    getVersion() {
-        return this.textStorage.version;
-    }
-
-    /** @internal */
-    getTelemetryFileSize() {
-        return this.textStorage.getTelemetryFileSize();
-    }
-
-    /** @internal */
-    public isDynamicOrHasMixedContent() {
+    public isDynamicOrHasMixedContent(): boolean {
         return this.hasMixedContent || this.isDynamic;
     }
 
-    public isScriptOpen() {
+    public isScriptOpen(): boolean {
         return this.textStorage.isOpen;
     }
 
-    public open(newText: string) {
+    public open(newText: string | undefined): void {
         this.textStorage.isOpen = true;
-        if (newText !== undefined &&
-            this.textStorage.reload(newText)) {
+        if (
+            newText !== undefined &&
+            this.textStorage.reload(newText)
+        ) {
             // reload new contents only if the existing contents changed
             this.markContainingProjectsAsDirty();
         }
     }
 
-    public close(fileExists = true) {
+    public close(fileExists = true): void {
         this.textStorage.isOpen = false;
-        if (this.isDynamicOrHasMixedContent() || !fileExists) {
-            if (this.textStorage.reload("")) {
-                this.markContainingProjectsAsDirty();
-            }
-        }
-        else if (this.textStorage.reloadFromDisk()) {
+        if (fileExists && this.textStorage.scheduleReloadIfNeeded()) {
             this.markContainingProjectsAsDirty();
         }
     }
 
-    public getSnapshot() {
+    public getSnapshot(): IScriptSnapshot {
         return this.textStorage.getSnapshot();
     }
 
@@ -481,8 +491,12 @@ export class ScriptInfo {
         return this.realpath && this.realpath !== this.path;
     }
 
-    getFormatCodeSettings(): FormatCodeSettings | undefined { return this.formatSettings; }
-    getPreferences(): protocol.UserPreferences | undefined { return this.preferences; }
+    getFormatCodeSettings(): FormatCodeSettings | undefined {
+        return this.formatSettings;
+    }
+    getPreferences(): protocol.UserPreferences | undefined {
+        return this.preferences;
+    }
 
     attachToProject(project: Project): boolean {
         const isNew = !this.isAttached(project);
@@ -496,17 +510,21 @@ export class ScriptInfo {
         return isNew;
     }
 
-    isAttached(project: Project) {
+    isAttached(project: Project): boolean {
         // unrolled for common cases
         switch (this.containingProjects.length) {
-            case 0: return false;
-            case 1: return this.containingProjects[0] === project;
-            case 2: return this.containingProjects[0] === project || this.containingProjects[1] === project;
-            default: return contains(this.containingProjects, project);
+            case 0:
+                return false;
+            case 1:
+                return this.containingProjects[0] === project;
+            case 2:
+                return this.containingProjects[0] === project || this.containingProjects[1] === project;
+            default:
+                return contains(this.containingProjects, project);
         }
     }
 
-    detachFromProject(project: Project) {
+    detachFromProject(project: Project): void {
         // unrolled for common cases
         switch (this.containingProjects.length) {
             case 0:
@@ -528,21 +546,22 @@ export class ScriptInfo {
                 }
                 break;
             default:
-                if (unorderedRemoveItem(this.containingProjects, project)) {
+                // We use first configured project as default so we shouldnt change the order of the containing projects
+                if (orderedRemoveItem(this.containingProjects, project)) {
                     project.onFileAddedOrRemoved(this.isSymlink());
                 }
                 break;
         }
     }
 
-    detachAllProjects() {
+    detachAllProjects(): void {
         for (const p of this.containingProjects) {
             if (isConfiguredProject(p)) {
                 p.getCachedDirectoryStructureHost().addOrDeleteFile(this.fileName, this.path, FileWatcherEventKind.Deleted);
             }
             const existingRoot = p.getRootFilesMap().get(this.path);
             // detach is unnecessary since we'll clean the list of containing projects anyways
-            p.removeFile(this, /*fileExists*/ false, /*detachFromProjects*/ false);
+            p.removeFile(this, /*fileExists*/ false, /*detachFromProject*/ false);
             p.onFileAddedOrRemoved(this.isSymlink());
             // If the info was for the external or configured project's root,
             // add missing file as the root
@@ -553,20 +572,21 @@ export class ScriptInfo {
         clear(this.containingProjects);
     }
 
-    getDefaultProject() {
+    getDefaultProject(): Project {
         switch (this.containingProjects.length) {
             case 0:
                 return Errors.ThrowNoProject();
             case 1:
-                return ensurePrimaryProjectKind(this.containingProjects[0]);
+                return isProjectDeferredClose(this.containingProjects[0]) || isBackgroundProject(this.containingProjects[0]) ?
+                    Errors.ThrowNoProject() :
+                    this.containingProjects[0];
             default:
                 // If this file belongs to multiple projects, below is the order in which default project is used
+                // - first external project
                 // - for open script info, its default configured project during opening is default if info is part of it
                 // - first configured project of which script info is not a source of project reference redirect
                 // - first configured project
-                // - first external project
                 // - first inferred project
-                let firstExternalProject: ExternalProject | undefined;
                 let firstConfiguredProject: ConfiguredProject | undefined;
                 let firstInferredProject: InferredProject | undefined;
                 let firstNonSourceOfProjectReferenceRedirect: ConfiguredProject | undefined;
@@ -574,11 +594,14 @@ export class ScriptInfo {
                 for (let index = 0; index < this.containingProjects.length; index++) {
                     const project = this.containingProjects[index];
                     if (isConfiguredProject(project)) {
+                        if (project.deferredClose) continue;
                         if (!project.isSourceOfProjectReferenceRedirect(this.fileName)) {
                             // If we havent found default configuredProject and
                             // its not the last one, find it and use that one if there
-                            if (defaultConfiguredProject === undefined &&
-                                index !== this.containingProjects.length - 1) {
+                            if (
+                                defaultConfiguredProject === undefined &&
+                                index !== this.containingProjects.length - 1
+                            ) {
                                 defaultConfiguredProject = project.projectService.findDefaultConfiguredProject(this) || false;
                             }
                             if (defaultConfiguredProject === project) return project;
@@ -586,18 +609,17 @@ export class ScriptInfo {
                         }
                         if (!firstConfiguredProject) firstConfiguredProject = project;
                     }
-                    else if (!firstExternalProject && isExternalProject(project)) {
-                        firstExternalProject = project;
+                    else if (isExternalProject(project)) {
+                        return project;
                     }
                     else if (!firstInferredProject && isInferredProject(project)) {
                         firstInferredProject = project;
                     }
                 }
-                return ensurePrimaryProjectKind(defaultConfiguredProject ||
+                return (defaultConfiguredProject ||
                     firstNonSourceOfProjectReferenceRedirect ||
                     firstConfiguredProject ||
-                    firstExternalProject ||
-                    firstInferredProject);
+                    firstInferredProject) ?? Errors.ThrowNoProject();
         }
     }
 
@@ -632,35 +654,23 @@ export class ScriptInfo {
         return this.textStorage.getVersion();
     }
 
-    saveTo(fileName: string) {
+    saveTo(fileName: string): void {
         this.host.writeFile(fileName, getSnapshotText(this.textStorage.getSnapshot()));
     }
 
     /** @internal */
-    delayReloadNonMixedContentFile() {
+    delayReloadNonMixedContentFile(): void {
         Debug.assert(!this.isDynamicOrHasMixedContent());
         this.textStorage.delayReloadFromFileIntoText();
         this.markContainingProjectsAsDirty();
     }
 
-    reloadFromFile(tempFileName?: NormalizedPath) {
-        if (this.isDynamicOrHasMixedContent()) {
-            this.textStorage.reload("");
+    reloadFromFile(tempFileName?: NormalizedPath): boolean {
+        if (this.textStorage.reloadWithFileText(tempFileName)) {
             this.markContainingProjectsAsDirty();
             return true;
         }
-        else {
-            if (this.textStorage.reloadWithFileText(tempFileName)) {
-                this.markContainingProjectsAsDirty();
-                return true;
-            }
-        }
         return false;
-    }
-
-    /** @internal */
-    getAbsolutePositionAndLineText(line: number): AbsolutePositionAndLineText {
-        return this.textStorage.getAbsolutePositionAndLineText(line);
     }
 
     editContent(start: number, end: number, newText: string): void {
@@ -668,27 +678,20 @@ export class ScriptInfo {
         this.markContainingProjectsAsDirty();
     }
 
-    markContainingProjectsAsDirty() {
+    markContainingProjectsAsDirty(): void {
         for (const p of this.containingProjects) {
             p.markFileAsDirty(this.path);
         }
     }
 
-    isOrphan() {
-        return !forEach(this.containingProjects, p => !p.isOrphan());
-    }
-
-    /** @internal */
-    isContainedByBackgroundProject() {
-        return some(
-            this.containingProjects,
-            p => p.projectKind === ProjectKind.AutoImportProvider || p.projectKind === ProjectKind.Auxiliary);
+    isOrphan(): boolean {
+        return this.deferredDelete || !forEach(this.containingProjects, p => !p.isOrphan());
     }
 
     /**
      *  @param line 1 based index
      */
-    lineToTextSpan(line: number) {
+    lineToTextSpan(line: number): TextSpan {
         return this.textStorage.lineToTextSpan(line);
     }
 
@@ -710,34 +713,17 @@ export class ScriptInfo {
         return location;
     }
 
-    public isJavaScript() {
+    public isJavaScript(): boolean {
         return this.scriptKind === ScriptKind.JS || this.scriptKind === ScriptKind.JSX;
     }
 
     /** @internal */
-    getLineInfo(): LineInfo {
-        return this.textStorage.getLineInfo();
-    }
-
-    /** @internal */
-    closeSourceMapFileWatcher() {
+    closeSourceMapFileWatcher(): void {
         if (this.sourceMapFilePath && !isString(this.sourceMapFilePath)) {
             closeFileWatcherOf(this.sourceMapFilePath);
             this.sourceMapFilePath = undefined;
         }
     }
-}
-
-/**
- * Throws an error if `project` is an AutoImportProvider or AuxiliaryProject,
- * which are used in the background by other Projects and should never be
- * reported as the default project for a ScriptInfo.
- */
-function ensurePrimaryProjectKind(project: Project | undefined) {
-    if (!project || project.projectKind === ProjectKind.AutoImportProvider || project.projectKind === ProjectKind.Auxiliary) {
-        return Errors.ThrowNoProject();
-    }
-    return project;
 }
 
 function failIfInvalidPosition(position: number) {
@@ -751,4 +737,20 @@ function failIfInvalidLocation(location: protocol.Location) {
 
     Debug.assert(location.line > 0, `Expected line to be non-${location.line === 0 ? "zero" : "negative"}`);
     Debug.assert(location.offset > 0, `Expected offset to be non-${location.offset === 0 ? "zero" : "negative"}`);
+}
+
+/** @internal */
+export function scriptInfoIsContainedByBackgroundProject(info: ScriptInfo): boolean {
+    return some(
+        info.containingProjects,
+        isBackgroundProject,
+    );
+}
+
+/** @internal */
+export function scriptInfoIsContainedByDeferredClosedProject(info: ScriptInfo): boolean {
+    return some(
+        info.containingProjects,
+        isProjectDeferredClose,
+    );
 }

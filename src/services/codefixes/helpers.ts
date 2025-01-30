@@ -1,3 +1,4 @@
+import { ImportAdder } from "../_namespaces/ts.codefix.js";
 import {
     AccessorDeclaration,
     append,
@@ -6,27 +7,33 @@ import {
     Block,
     CallExpression,
     CharacterCodes,
+    CheckFlags,
     ClassLikeDeclaration,
     CodeFixContextBase,
     combine,
     Debug,
+    Declaration,
     Diagnostics,
     emptyArray,
     EntityName,
     Expression,
     factory,
     find,
+    firstOrUndefined,
     flatMap,
     FunctionDeclaration,
     FunctionExpression,
+    GenericType,
     GetAccessorDeclaration,
     getAllAccessorDeclarations,
+    getCheckFlags,
     getEffectiveModifierFlags,
     getEmitScriptTarget,
     getFirstIdentifier,
     getModuleSpecifierResolverHost,
     getNameForExportedSymbol,
     getNameOfDeclaration,
+    getPropertyNameFromType,
     getQuotePreference,
     getSetAccessorValueParameter,
     getSynthesizedDeepClone,
@@ -35,6 +42,7 @@ import {
     hasAbstractModifier,
     Identifier,
     idText,
+    InternalNodeBuilderFlags,
     IntersectionType,
     isArrowFunction,
     isAutoAccessorPropertyDeclaration,
@@ -51,6 +59,9 @@ import {
     isPropertyAssignment,
     isSetAccessorDeclaration,
     isStringLiteral,
+    isTypeNode,
+    isTypeReferenceNode,
+    isTypeUsableAsPropertyName,
     isYieldExpression,
     LanguageServiceHost,
     length,
@@ -63,11 +74,11 @@ import {
     NodeArray,
     NodeBuilderFlags,
     NodeFlags,
-    nullTransformationContext,
     ObjectFlags,
     ObjectLiteralExpression,
     ObjectType,
     ParameterDeclaration,
+    PrivateIdentifier,
     Program,
     PropertyAssignment,
     PropertyDeclaration,
@@ -89,6 +100,7 @@ import {
     textChanges,
     TextSpan,
     textSpanEnd,
+    TransientSymbol,
     tryCast,
     TsConfigSourceFile,
     Type,
@@ -96,12 +108,14 @@ import {
     TypeFlags,
     TypeNode,
     TypeParameterDeclaration,
+    TypePredicate,
+    unescapeLeadingUnderscores,
     UnionType,
     UserPreferences,
     visitEachChild,
     visitNode,
-} from "../_namespaces/ts";
-import { ImportAdder } from "../_namespaces/ts.codefix";
+    visitNodes,
+} from "../_namespaces/ts.js";
 
 /**
  * Finds members of the resolved type that are missing in the class pointed to by class decl
@@ -119,11 +133,12 @@ export function createMissingMemberNodes(
     context: TypeConstructionContext,
     preferences: UserPreferences,
     importAdder: ImportAdder | undefined,
-    addClassElement: (node: AddNode) => void): void {
+    addClassElement: (node: AddNode) => void,
+): void {
     const classMembers = classDeclaration.symbol.members!;
     for (const symbol of possiblyMissingSymbols) {
         if (!classMembers.has(symbol.escapedName)) {
-            addNewNodeForMemberSymbol(symbol, classDeclaration, sourceFile, context, preferences, importAdder, addClassElement, /* body */ undefined);
+            addNewNodeForMemberSymbol(symbol, classDeclaration, sourceFile, context, preferences, importAdder, addClassElement, /*body*/ undefined);
         }
     }
 }
@@ -147,9 +162,9 @@ export type AddNode = PropertyDeclaration | GetAccessorDeclaration | SetAccessor
 
 /** @internal */
 export const enum PreserveOptionalFlags {
-    Method  = 1 << 0,
+    Method = 1 << 0,
     Property = 1 << 1,
-    All     = Method | Property
+    All = Method | Property,
 }
 
 /**
@@ -167,11 +182,11 @@ export function addNewNodeForMemberSymbol(
     importAdder: ImportAdder | undefined,
     addClassElement: (node: AddNode) => void,
     body: Block | undefined,
-    preserveOptional = PreserveOptionalFlags.All,
+    preserveOptional: PreserveOptionalFlags = PreserveOptionalFlags.All,
     isAmbient = false,
 ): void {
     const declarations = symbol.getDeclarations();
-    const declaration = declarations?.[0];
+    const declaration = firstOrUndefined(declarations);
     const checker = context.program.getTypeChecker();
     const scriptTarget = getEmitScriptTarget(context.program.getCompilerOptions());
 
@@ -190,10 +205,10 @@ export function addNewNodeForMemberSymbol(
      * In such cases, we assume the declaration to be a `PropertySignature`.
      */
     const kind = declaration?.kind ?? SyntaxKind.PropertySignature;
-    const declarationName = getSynthesizedDeepClone(getNameOfDeclaration(declaration), /*includeTrivia*/ false) as PropertyName;
+    const declarationName = createDeclarationName(symbol, declaration);
     const effectiveModifierFlags = declaration ? getEffectiveModifierFlags(declaration) : ModifierFlags.None;
-    let modifierFlags =
-        effectiveModifierFlags & ModifierFlags.Public ? ModifierFlags.Public :
+    let modifierFlags = effectiveModifierFlags & ModifierFlags.Static;
+    modifierFlags |= effectiveModifierFlags & ModifierFlags.Public ? ModifierFlags.Public :
         effectiveModifierFlags & ModifierFlags.Protected ? ModifierFlags.Protected :
         ModifierFlags.None;
     if (declaration && isAutoAccessorPropertyDeclaration(declaration)) {
@@ -204,12 +219,13 @@ export function addNewNodeForMemberSymbol(
     const optional = !!(symbol.flags & SymbolFlags.Optional);
     const ambient = !!(enclosingDeclaration.flags & NodeFlags.Ambient) || isAmbient;
     const quotePreference = getQuotePreference(sourceFile, preferences);
+    const flags = NodeBuilderFlags.NoTruncation
+        | (quotePreference === QuotePreference.Single ? NodeBuilderFlags.UseSingleQuotesForStringLiteralType : NodeBuilderFlags.None);
 
     switch (kind) {
         case SyntaxKind.PropertySignature:
         case SyntaxKind.PropertyDeclaration:
-            const flags = quotePreference === QuotePreference.Single ? NodeBuilderFlags.UseSingleQuotesForStringLiteralType : undefined;
-            let typeNode = checker.typeToTypeNode(type, enclosingDeclaration, flags, getNoopSymbolTrackerWithResolver(context));
+            let typeNode = checker.typeToTypeNode(type, enclosingDeclaration, flags, InternalNodeBuilderFlags.AllowUnresolvedNames, getNoopSymbolTrackerWithResolver(context));
             if (importAdder) {
                 const importableReference = tryGetAutoImportableReferenceFromTypeNode(typeNode, scriptTarget);
                 if (importableReference) {
@@ -222,12 +238,13 @@ export function addNewNodeForMemberSymbol(
                 declaration ? createName(declarationName) : symbol.getName(),
                 optional && (preserveOptional & PreserveOptionalFlags.Property) ? factory.createToken(SyntaxKind.QuestionToken) : undefined,
                 typeNode,
-                /*initializer*/ undefined));
+                /*initializer*/ undefined,
+            ));
             break;
         case SyntaxKind.GetAccessor:
         case SyntaxKind.SetAccessor: {
             Debug.assertIsDefined(declarations);
-            let typeNode = checker.typeToTypeNode(type, enclosingDeclaration, /*flags*/ undefined, getNoopSymbolTrackerWithResolver(context));
+            let typeNode = checker.typeToTypeNode(type, enclosingDeclaration, flags, /*internalFlags*/ undefined, getNoopSymbolTrackerWithResolver(context));
             const allAccessors = getAllAccessorDeclarations(declarations, declaration as AccessorDeclaration);
             const orderedAccessors = allAccessors.secondAccessor
                 ? [allAccessors.firstAccessor, allAccessors.secondAccessor]
@@ -246,7 +263,8 @@ export function addNewNodeForMemberSymbol(
                         createName(declarationName),
                         emptyArray,
                         createTypeNode(typeNode),
-                        createBody(body, quotePreference, ambient)));
+                        createBody(body, quotePreference, ambient),
+                    ));
                 }
                 else {
                     Debug.assertNode(accessor, isSetAccessorDeclaration, "The counterpart to a getter should be a setter");
@@ -256,7 +274,8 @@ export function addNewNodeForMemberSymbol(
                         modifiers,
                         createName(declarationName),
                         createDummyParameters(1, [parameterName], [createTypeNode(typeNode)], 1, /*inJs*/ false),
-                        createBody(body, quotePreference, ambient)));
+                        createBody(body, quotePreference, ambient),
+                    ));
                 }
             }
             break;
@@ -284,6 +303,9 @@ export function addNewNodeForMemberSymbol(
             }
 
             for (const signature of signatures) {
+                if (signature.declaration && (signature.declaration.flags & NodeFlags.Ambient)) {
+                    continue;
+                }
                 // Ensure nodes are fresh so they can have different positions when going through formatting.
                 outputMethod(quotePreference, signature, modifiers, createName(declarationName));
             }
@@ -305,7 +327,6 @@ export function addNewNodeForMemberSymbol(
         const method = createSignatureDeclarationFromSignature(SyntaxKind.MethodDeclaration, context, quotePreference, signature, body, name, modifiers, optional && !!(preserveOptional & PreserveOptionalFlags.Method), enclosingDeclaration, importAdder) as MethodDeclaration;
         if (method) addClassElement(method);
     }
-
 
     function createModifiers(): NodeArray<Modifier> | undefined {
         let modifiers: Modifier[] | undefined;
@@ -340,6 +361,16 @@ export function addNewNodeForMemberSymbol(
     function createTypeNode(typeNode: TypeNode | undefined) {
         return getSynthesizedDeepClone(typeNode, /*includeTrivia*/ false);
     }
+
+    function createDeclarationName(symbol: Symbol, declaration: Declaration | undefined): PropertyName {
+        if (getCheckFlags(symbol) & CheckFlags.Mapped) {
+            const nameType = (symbol as TransientSymbol).links.nameType;
+            if (nameType && isTypeUsableAsPropertyName(nameType)) {
+                return factory.createIdentifier(unescapeLeadingUnderscores(getPropertyNameFromType(nameType)));
+            }
+        }
+        return getSynthesizedDeepClone(getNameOfDeclaration(declaration), /*includeTrivia*/ false) as PropertyName;
+    }
 }
 
 /** @internal */
@@ -357,25 +388,24 @@ export function createSignatureDeclarationFromSignature(
     modifiers: NodeArray<Modifier> | undefined,
     optional: boolean | undefined,
     enclosingDeclaration: Node | undefined,
-    importAdder: ImportAdder | undefined
-) {
+    importAdder: ImportAdder | undefined,
+): FunctionDeclaration | MethodDeclaration | FunctionExpression | ArrowFunction | undefined {
     const program = context.program;
     const checker = program.getTypeChecker();
     const scriptTarget = getEmitScriptTarget(program.getCompilerOptions());
     const isJs = isInJSFile(enclosingDeclaration);
-    const flags =
-        NodeBuilderFlags.NoTruncation
+    const flags = NodeBuilderFlags.NoTruncation
         | NodeBuilderFlags.SuppressAnyReturnType
         | NodeBuilderFlags.AllowEmptyTuple
         | (quotePreference === QuotePreference.Single ? NodeBuilderFlags.UseSingleQuotesForStringLiteralType : NodeBuilderFlags.None);
-    const signatureDeclaration = checker.signatureToSignatureDeclaration(signature, kind, enclosingDeclaration, flags, getNoopSymbolTrackerWithResolver(context)) as ArrowFunction | FunctionExpression | MethodDeclaration | FunctionDeclaration;
+    const signatureDeclaration = checker.signatureToSignatureDeclaration(signature, kind, enclosingDeclaration, flags, InternalNodeBuilderFlags.AllowUnresolvedNames, getNoopSymbolTrackerWithResolver(context)) as ArrowFunction | FunctionExpression | MethodDeclaration | FunctionDeclaration;
     if (!signatureDeclaration) {
         return undefined;
     }
 
     let typeParameters = isJs ? undefined : signatureDeclaration.typeParameters;
     let parameters = signatureDeclaration.parameters;
-    let type = isJs ? undefined : signatureDeclaration.type;
+    let type = isJs ? undefined : getSynthesizedDeepClone(signatureDeclaration.type);
     if (importAdder) {
         if (typeParameters) {
             const newTypeParameters = sameMap(typeParameters, typeParameterDecl => {
@@ -400,7 +430,7 @@ export function createSignatureDeclarationFromSignature(
                     typeParameterDecl.modifiers,
                     typeParameterDecl.name,
                     constraint,
-                    defaultType
+                    defaultType,
                 );
             });
             if (typeParameters !== newTypeParameters) {
@@ -423,7 +453,7 @@ export function createSignatureDeclarationFromSignature(
                 parameterDecl.name,
                 isJs ? undefined : parameterDecl.questionToken,
                 type,
-                parameterDecl.initializer
+                parameterDecl.initializer,
             );
         });
         if (parameters !== newParameters) {
@@ -461,9 +491,9 @@ export function createSignatureDeclarationFromCallExpression(
     context: CodeFixContextBase,
     importAdder: ImportAdder,
     call: CallExpression,
-    name: Identifier | string,
+    name: Identifier | PrivateIdentifier | string,
     modifierFlags: ModifierFlags,
-    contextNode: Node
+    contextNode: Node,
 ): MethodDeclaration | FunctionDeclaration | MethodSignature {
     const quotePreference = getQuotePreference(context.sourceFile, context.preferences);
     const scriptTarget = getEmitScriptTarget(context.program.getCompilerOptions());
@@ -473,11 +503,17 @@ export function createSignatureDeclarationFromCallExpression(
     const { typeArguments, arguments: args, parent } = call;
 
     const contextualType = isJs ? undefined : checker.getContextualType(call);
-    const names = map(args, arg =>
-        isIdentifier(arg) ? arg.text : isPropertyAccessExpression(arg) && isIdentifier(arg.name) ? arg.name.text : undefined);
+    const names = map(args, arg => isIdentifier(arg) ? arg.text : isPropertyAccessExpression(arg) && isIdentifier(arg.name) ? arg.name.text : undefined);
     const instanceTypes = isJs ? [] : map(args, arg => checker.getTypeAtLocation(arg));
     const { argumentTypeNodes, argumentTypeParameters } = getArgumentTypesAndTypeParameters(
-        checker, importAdder, instanceTypes, contextNode, scriptTarget, /*flags*/ undefined, tracker
+        checker,
+        importAdder,
+        instanceTypes,
+        contextNode,
+        scriptTarget,
+        NodeBuilderFlags.NoTruncation,
+        InternalNodeBuilderFlags.AllowUnresolvedNames,
+        tracker,
     );
 
     const modifiers = modifierFlags
@@ -490,7 +526,7 @@ export function createSignatureDeclarationFromCallExpression(
     const parameters = createDummyParameters(args.length, names, argumentTypeNodes, /*minArgumentCount*/ undefined, isJs);
     const type = isJs || contextualType === undefined
         ? undefined
-        : checker.typeToTypeNode(contextualType, contextNode, /*flags*/ undefined, tracker);
+        : checker.typeToTypeNode(contextualType, contextNode, /*flags*/ undefined, /*internalFlags*/ undefined, tracker);
 
     switch (kind) {
         case SyntaxKind.MethodDeclaration:
@@ -502,7 +538,7 @@ export function createSignatureDeclarationFromCallExpression(
                 typeParameters,
                 parameters,
                 type,
-                createStubbedMethodBody(quotePreference)
+                createStubbedMethodBody(quotePreference),
             );
         case SyntaxKind.MethodSignature:
             return factory.createMethodSignature(
@@ -511,9 +547,10 @@ export function createSignatureDeclarationFromCallExpression(
                 /*questionToken*/ undefined,
                 typeParameters,
                 parameters,
-                type === undefined ? factory.createKeywordTypeNode(SyntaxKind.UnknownKeyword) : type
+                type === undefined ? factory.createKeywordTypeNode(SyntaxKind.UnknownKeyword) : type,
             );
         case SyntaxKind.FunctionDeclaration:
+            Debug.assert(typeof name === "string" || isIdentifier(name), "Unexpected name");
             return factory.createFunctionDeclaration(
                 modifiers,
                 asteriskToken,
@@ -521,7 +558,7 @@ export function createSignatureDeclarationFromCallExpression(
                 typeParameters,
                 parameters,
                 type,
-                createStubbedBody(Diagnostics.Function_not_implemented.message, quotePreference)
+                createStubbedBody(Diagnostics.Function_not_implemented.message, quotePreference),
             );
         default:
             Debug.fail("Unexpected kind");
@@ -546,8 +583,8 @@ function createTypeParametersForArguments(checker: TypeChecker, argumentTypePara
         }
     }
 
-    return map(
-        arrayFrom(usedNames.values()),
+    return arrayFrom(
+        usedNames.values(),
         usedName => factory.createTypeParameterDeclaration(/*modifiers*/ undefined, usedName, constraintsByName.get(usedName)?.constraint),
     );
 }
@@ -559,18 +596,72 @@ function createTypeParameterName(index: number) {
 }
 
 /** @internal */
-export function typeToAutoImportableTypeNode(checker: TypeChecker, importAdder: ImportAdder, type: Type, contextNode: Node | undefined, scriptTarget: ScriptTarget, flags?: NodeBuilderFlags, tracker?: SymbolTracker): TypeNode | undefined {
-    let typeNode = checker.typeToTypeNode(type, contextNode, flags, tracker);
-    if (typeNode && isImportTypeNode(typeNode)) {
-        const importableReference = tryGetAutoImportableReferenceFromTypeNode(typeNode, scriptTarget);
-        if (importableReference) {
-            importSymbols(importAdder, importableReference.symbols);
-            typeNode = importableReference.typeNode;
-        }
+export function typeToAutoImportableTypeNode(checker: TypeChecker, importAdder: ImportAdder, type: Type, contextNode: Node | undefined, scriptTarget: ScriptTarget, flags?: NodeBuilderFlags, internalFlags?: InternalNodeBuilderFlags, tracker?: SymbolTracker): TypeNode | undefined {
+    const typeNode = checker.typeToTypeNode(type, contextNode, flags, internalFlags, tracker);
+    if (!typeNode) {
+        return undefined;
+    }
+    return typeNodeToAutoImportableTypeNode(typeNode, importAdder, scriptTarget);
+}
+
+/** @internal */
+export function typeNodeToAutoImportableTypeNode(typeNode: TypeNode, importAdder: ImportAdder, scriptTarget: ScriptTarget): TypeNode | undefined {
+    const importableReference = tryGetAutoImportableReferenceFromTypeNode(typeNode, scriptTarget);
+    if (importableReference) {
+        importSymbols(importAdder, importableReference.symbols);
+        typeNode = importableReference.typeNode;
     }
 
     // Ensure nodes are fresh so they can have different positions when going through formatting.
     return getSynthesizedDeepClone(typeNode);
+}
+
+function endOfRequiredTypeParameters(checker: TypeChecker, type: GenericType): number {
+    Debug.assert(type.typeArguments);
+    const fullTypeArguments = type.typeArguments;
+    const target = type.target;
+    for (let cutoff = 0; cutoff < fullTypeArguments.length; cutoff++) {
+        const typeArguments = fullTypeArguments.slice(0, cutoff);
+        const filledIn = checker.fillMissingTypeArguments(typeArguments, target.typeParameters, cutoff, /*isJavaScriptImplicitAny*/ false);
+        if (filledIn.every((fill, i) => fill === fullTypeArguments[i])) {
+            return cutoff;
+        }
+    }
+    // If we make it all the way here, all the type arguments are required.
+    return fullTypeArguments.length;
+}
+
+/** @internal */
+export function typeToMinimizedReferenceType(checker: TypeChecker, type: Type, contextNode: Node | undefined, flags?: NodeBuilderFlags, internalFlags?: InternalNodeBuilderFlags, tracker?: SymbolTracker): TypeNode | undefined {
+    let typeNode = checker.typeToTypeNode(type, contextNode, flags, internalFlags, tracker);
+    if (!typeNode) {
+        return undefined;
+    }
+    if (isTypeReferenceNode(typeNode)) {
+        const genericType = type as GenericType;
+        if (genericType.typeArguments && typeNode.typeArguments) {
+            const cutoff = endOfRequiredTypeParameters(checker, genericType);
+            if (cutoff < typeNode.typeArguments.length) {
+                const newTypeArguments = factory.createNodeArray(typeNode.typeArguments.slice(0, cutoff));
+                typeNode = factory.updateTypeReferenceNode(typeNode, typeNode.typeName, newTypeArguments);
+            }
+        }
+    }
+    return typeNode;
+}
+
+/** @internal */
+export function typePredicateToAutoImportableTypeNode(checker: TypeChecker, importAdder: ImportAdder, typePredicate: TypePredicate, contextNode: Node | undefined, scriptTarget: ScriptTarget, flags?: NodeBuilderFlags, internalFlags?: InternalNodeBuilderFlags, tracker?: SymbolTracker): TypeNode | undefined {
+    let typePredicateNode = checker.typePredicateToTypePredicateNode(typePredicate, contextNode, flags, internalFlags, tracker);
+    if (typePredicateNode?.type && isImportTypeNode(typePredicateNode.type)) {
+        const importableReference = tryGetAutoImportableReferenceFromTypeNode(typePredicateNode.type, scriptTarget);
+        if (importableReference) {
+            importSymbols(importAdder, importableReference.symbols);
+            typePredicateNode = factory.updateTypePredicateNode(typePredicateNode, typePredicateNode.assertsModifier, typePredicateNode.parameterName, importableReference.typeNode);
+        }
+    }
+    // Ensure nodes are fresh so they can have different positions when going through formatting.
+    return getSynthesizedDeepClone(typePredicateNode);
 }
 
 function typeContainsTypeParameter(type: Type) {
@@ -581,8 +672,7 @@ function typeContainsTypeParameter(type: Type) {
     return type.flags & TypeFlags.TypeParameter;
 }
 
-/** @internal */
-export function getArgumentTypesAndTypeParameters(checker: TypeChecker, importAdder: ImportAdder, instanceTypes: Type[], contextNode: Node | undefined, scriptTarget: ScriptTarget, flags?: NodeBuilderFlags, tracker?: SymbolTracker) {
+function getArgumentTypesAndTypeParameters(checker: TypeChecker, importAdder: ImportAdder, instanceTypes: Type[], contextNode: Node | undefined, scriptTarget: ScriptTarget, flags?: NodeBuilderFlags, internalFlags?: InternalNodeBuilderFlags, tracker?: SymbolTracker) {
     // Types to be used as the types of the parameters in the new function
     // E.g. from this source:
     //   added("", 0)
@@ -625,7 +715,7 @@ export function getArgumentTypesAndTypeParameters(checker: TypeChecker, importAd
 
         // Widen the type so we don't emit nonsense annotations like "function fn(x: 3) {"
         const widenedInstanceType = checker.getBaseTypeOfLiteralType(instanceType);
-        const argumentTypeNode = typeToAutoImportableTypeNode(checker, importAdder, widenedInstanceType, contextNode, scriptTarget, flags, tracker);
+        const argumentTypeNode = typeToAutoImportableTypeNode(checker, importAdder, widenedInstanceType, contextNode, scriptTarget, flags, internalFlags, tracker);
         if (!argumentTypeNode) {
             continue;
         }
@@ -643,7 +733,7 @@ export function getArgumentTypesAndTypeParameters(checker: TypeChecker, importAd
         // We instead want to output:
         //    function added<T extends string>(value: T) { ... }
         const instanceTypeConstraint = instanceType.isTypeParameter() && instanceType.constraint && !isAnonymousObjectConstraintType(instanceType.constraint)
-            ? typeToAutoImportableTypeNode(checker, importAdder, instanceType.constraint, contextNode, scriptTarget, flags, tracker)
+            ? typeToAutoImportableTypeNode(checker, importAdder, instanceType.constraint, contextNode, scriptTarget, flags, internalFlags, tracker)
             : undefined;
 
         if (argumentTypeParameter) {
@@ -687,7 +777,8 @@ function createDummyParameters(argCount: number, names: (string | undefined)[] |
             /*name*/ parameterName + (parameterNameCount || ""),
             /*questionToken*/ minArgumentCount !== undefined && i >= minArgumentCount ? factory.createToken(SyntaxKind.QuestionToken) : undefined,
             /*type*/ inJs ? undefined : types?.[i] || factory.createKeywordTypeNode(SyntaxKind.UnknownKeyword),
-            /*initializer*/ undefined);
+            /*initializer*/ undefined,
+        );
         parameters.push(newParameter);
     }
     return parameters;
@@ -722,7 +813,7 @@ function createMethodImplementingSignatures(
     }
     const maxNonRestArgs = maxArgsSignature.parameters.length - (signatureHasRestParameter(maxArgsSignature) ? 1 : 0);
     const maxArgsParameterSymbolNames = maxArgsSignature.parameters.map(symbol => symbol.name);
-    const parameters = createDummyParameters(maxNonRestArgs, maxArgsParameterSymbolNames, /* types */ undefined, minArgumentCount, /*inJs*/ false);
+    const parameters = createDummyParameters(maxNonRestArgs, maxArgsParameterSymbolNames, /*types*/ undefined, minArgumentCount, /*inJs*/ false);
 
     if (someSigHasRestParameter) {
         const restParameter = factory.createParameterDeclaration(
@@ -731,7 +822,8 @@ function createMethodImplementingSignatures(
             maxArgsParameterSymbolNames[maxNonRestArgs] || "rest",
             /*questionToken*/ maxNonRestArgs >= minArgumentCount ? factory.createToken(SyntaxKind.QuestionToken) : undefined,
             factory.createArrayTypeNode(factory.createKeywordTypeNode(SyntaxKind.UnknownKeyword)),
-            /*initializer*/ undefined);
+            /*initializer*/ undefined,
+        );
         parameters.push(restParameter);
     }
 
@@ -743,13 +835,14 @@ function createMethodImplementingSignatures(
         parameters,
         getReturnTypeFromSignatures(signatures, checker, context, enclosingDeclaration),
         quotePreference,
-        body);
+        body,
+    );
 }
 
 function getReturnTypeFromSignatures(signatures: readonly Signature[], checker: TypeChecker, context: TypeConstructionContext, enclosingDeclaration: ClassLikeDeclaration): TypeNode | undefined {
     if (length(signatures)) {
         const type = checker.getUnionType(map(signatures, checker.getReturnTypeOfSignature));
-        return checker.typeToTypeNode(type, enclosingDeclaration, /*flags*/ undefined, getNoopSymbolTrackerWithResolver(context));
+        return checker.typeToTypeNode(type, enclosingDeclaration, NodeBuilderFlags.NoTruncation, InternalNodeBuilderFlags.AllowUnresolvedNames, getNoopSymbolTrackerWithResolver(context));
     }
 }
 
@@ -761,7 +854,7 @@ function createStubbedMethod(
     parameters: readonly ParameterDeclaration[],
     returnType: TypeNode | undefined,
     quotePreference: QuotePreference,
-    body: Block | undefined
+    body: Block | undefined,
 ): MethodDeclaration {
     return factory.createMethodDeclaration(
         modifiers,
@@ -771,7 +864,8 @@ function createStubbedMethod(
         typeParameters,
         parameters,
         returnType,
-        body || createStubbedMethodBody(quotePreference));
+        body || createStubbedMethodBody(quotePreference),
+    );
 }
 
 function createStubbedMethodBody(quotePreference: QuotePreference) {
@@ -786,24 +880,32 @@ export function createStubbedBody(text: string, quotePreference: QuotePreference
                 factory.createIdentifier("Error"),
                 /*typeArguments*/ undefined,
                 // TODO Handle auto quote preference.
-                [factory.createStringLiteral(text, /*isSingleQuote*/ quotePreference === QuotePreference.Single)]))],
-        /*multiline*/ true);
+                [factory.createStringLiteral(text, /*isSingleQuote*/ quotePreference === QuotePreference.Single)],
+            ),
+        )],
+        /*multiLine*/ true,
+    );
 }
 
 /** @internal */
 export function setJsonCompilerOptionValues(
     changeTracker: textChanges.ChangeTracker,
     configFile: TsConfigSourceFile,
-    options: [string, Expression][]
-) {
+    options: [string, Expression][],
+): undefined {
     const tsconfigObjectLiteral = getTsConfigObjectLiteralExpression(configFile);
     if (!tsconfigObjectLiteral) return undefined;
 
     const compilerOptionsProperty = findJsonProperty(tsconfigObjectLiteral, "compilerOptions");
     if (compilerOptionsProperty === undefined) {
-        changeTracker.insertNodeAtObjectStart(configFile, tsconfigObjectLiteral, createJsonPropertyAssignment(
-            "compilerOptions",
-            factory.createObjectLiteralExpression(options.map(([optionName, optionValue]) => createJsonPropertyAssignment(optionName, optionValue)), /*multiLine*/ true)));
+        changeTracker.insertNodeAtObjectStart(
+            configFile,
+            tsconfigObjectLiteral,
+            createJsonPropertyAssignment(
+                "compilerOptions",
+                factory.createObjectLiteralExpression(options.map(([optionName, optionValue]) => createJsonPropertyAssignment(optionName, optionValue)), /*multiLine*/ true),
+            ),
+        );
         return;
     }
 
@@ -829,17 +931,15 @@ export function setJsonCompilerOptionValue(
     configFile: TsConfigSourceFile,
     optionName: string,
     optionValue: Expression,
-) {
+): void {
     setJsonCompilerOptionValues(changeTracker, configFile, [[optionName, optionValue]]);
 }
 
-/** @internal */
-export function createJsonPropertyAssignment(name: string, initializer: Expression) {
+function createJsonPropertyAssignment(name: string, initializer: Expression) {
     return factory.createPropertyAssignment(factory.createStringLiteral(name), initializer);
 }
 
-/** @internal */
-export function findJsonProperty(obj: ObjectLiteralExpression, name: string): PropertyAssignment | undefined {
+function findJsonProperty(obj: ObjectLiteralExpression, name: string): PropertyAssignment | undefined {
     return find(obj.properties, (p): p is PropertyAssignment => isPropertyAssignment(p) && !!p.name && isStringLiteral(p.name) && p.name.text === name);
 }
 
@@ -850,28 +950,36 @@ export function findJsonProperty(obj: ObjectLiteralExpression, name: string): Pr
  *
  * @internal
  */
-export function tryGetAutoImportableReferenceFromTypeNode(importTypeNode: TypeNode | undefined, scriptTarget: ScriptTarget) {
+export function tryGetAutoImportableReferenceFromTypeNode(importTypeNode: TypeNode | undefined, scriptTarget: ScriptTarget): {
+    typeNode: TypeNode;
+    symbols: Symbol[];
+} | undefined {
     let symbols: Symbol[] | undefined;
-    const typeNode = visitNode(importTypeNode, visit);
+    const typeNode = visitNode(importTypeNode, visit, isTypeNode);
     if (symbols && typeNode) {
         return { typeNode, symbols };
     }
 
-    function visit(node: TypeNode): TypeNode;
     function visit(node: Node): Node {
         if (isLiteralImportTypeNode(node) && node.qualifier) {
             // Symbol for the left-most thing after the dot
             const firstIdentifier = getFirstIdentifier(node.qualifier);
+            if (!firstIdentifier.symbol) {
+                // if symbol is missing then this doesn't come from a synthesized import type node
+                // it has to be an import type node authored by the user and thus it has to be valid
+                // it can't refer to reserved internal symbol names and such
+                return visitEachChild(node, visit, /*context*/ undefined);
+            }
             const name = getNameForExportedSymbol(firstIdentifier.symbol, scriptTarget);
             const qualifier = name !== firstIdentifier.text
                 ? replaceFirstIdentifierOfEntityName(node.qualifier, factory.createIdentifier(name))
                 : node.qualifier;
 
             symbols = append(symbols, firstIdentifier.symbol);
-            const typeArguments = node.typeArguments?.map(visit);
+            const typeArguments = visitNodes(node.typeArguments, visit, isTypeNode);
             return factory.createTypeReferenceNode(qualifier, typeArguments);
         }
-        return visitEachChild(node, visit, nullTransformationContext);
+        return visitEachChild(node, visit, /*context*/ undefined);
     }
 }
 
@@ -883,7 +991,7 @@ function replaceFirstIdentifierOfEntityName(name: EntityName, newIdentifier: Ide
 }
 
 /** @internal */
-export function importSymbols(importAdder: ImportAdder, symbols: readonly Symbol[]) {
+export function importSymbols(importAdder: ImportAdder, symbols: readonly Symbol[]): void {
     symbols.forEach(s => importAdder.addImportFromExportedSymbol(s, /*isValidTypeOnlyUseSite*/ true));
 }
 

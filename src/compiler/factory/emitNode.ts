@@ -2,15 +2,21 @@ import {
     AccessExpression,
     append,
     appendIfUnique,
+    AutoGenerateInfo,
     Debug,
     EmitFlags,
     EmitHelper,
     EmitNode,
     getParseTreeNode,
     getSourceFileOfNode,
+    Identifier,
+    ImportSpecifier,
+    InternalEmitFlags,
     isParseTreeNode,
     Node,
+    NodeArray,
     orderedRemoveItem,
+    PrivateIdentifier,
     SnippetElement,
     some,
     SourceFile,
@@ -19,7 +25,8 @@ import {
     SynthesizedComment,
     TextRange,
     TypeNode,
-} from "../_namespaces/ts";
+    TypeParameterDeclaration,
+} from "../_namespaces/ts.js";
 
 /**
  * Associates a node with the current transformation, initializing
@@ -43,7 +50,7 @@ export function getOrCreateEmitNode(node: Node): EmitNode {
         node.emitNode = {} as EmitNode;
     }
     else {
-        Debug.assert(!(node.emitNode.flags & EmitFlags.Immutable), "Invalid attempt to mutate an immutable node.");
+        Debug.assert(!(node.emitNode.internalFlags & InternalEmitFlags.Immutable), "Invalid attempt to mutate an immutable node.");
     }
     return node.emitNode;
 }
@@ -52,7 +59,7 @@ export function getOrCreateEmitNode(node: Node): EmitNode {
  * Clears any `EmitNode` entries from parse-tree nodes.
  * @param sourceFile A source file.
  */
-export function disposeEmitNodes(sourceFile: SourceFile | undefined) {
+export function disposeEmitNodes(sourceFile: SourceFile | undefined): void {
     // During transformation we may need to annotate a parse tree node with transient
     // transformation properties. As parse tree nodes live longer than transformation
     // nodes, we need to make sure we reclaim any memory allocated for custom ranges
@@ -82,7 +89,7 @@ export function removeAllComments<T extends Node>(node: T): T {
 /**
  * Sets flags that control emit behavior of a node.
  */
-export function setEmitFlags<T extends Node>(node: T, emitFlags: EmitFlags) {
+export function setEmitFlags<T extends Node>(node: T, emitFlags: EmitFlags): T {
     getOrCreateEmitNode(node).flags = emitFlags;
     return node;
 }
@@ -92,9 +99,30 @@ export function setEmitFlags<T extends Node>(node: T, emitFlags: EmitFlags) {
  *
  * @internal
  */
-export function addEmitFlags<T extends Node>(node: T, emitFlags: EmitFlags) {
+export function addEmitFlags<T extends Node>(node: T, emitFlags: EmitFlags): T {
     const emitNode = getOrCreateEmitNode(node);
     emitNode.flags = emitNode.flags | emitFlags;
+    return node;
+}
+
+/**
+ * Sets flags that control emit behavior of a node.
+ *
+ * @internal
+ */
+export function setInternalEmitFlags<T extends Node>(node: T, emitFlags: InternalEmitFlags): T {
+    getOrCreateEmitNode(node).internalFlags = emitFlags;
+    return node;
+}
+
+/**
+ * Sets flags that control emit behavior of a node.
+ *
+ * @internal
+ */
+export function addInternalEmitFlags<T extends Node>(node: T, emitFlags: InternalEmitFlags): T {
+    const emitNode = getOrCreateEmitNode(node);
+    emitNode.internalFlags = emitNode.internalFlags | emitFlags;
     return node;
 }
 
@@ -108,7 +136,7 @@ export function getSourceMapRange(node: Node): SourceMapRange {
 /**
  * Sets a custom text range to use when emitting source maps.
  */
-export function setSourceMapRange<T extends Node>(node: T, range: SourceMapRange | undefined) {
+export function setSourceMapRange<T extends Node>(node: T, range: SourceMapRange | undefined): T {
     getOrCreateEmitNode(node).sourceMapRange = range;
     return node;
 }
@@ -123,7 +151,7 @@ export function getTokenSourceMapRange(node: Node, token: SyntaxKind): SourceMap
 /**
  * Sets the TextRange to use for source maps for a token of a node.
  */
-export function setTokenSourceMapRange<T extends Node>(node: T, token: SyntaxKind, range: SourceMapRange | undefined) {
+export function setTokenSourceMapRange<T extends Node>(node: T, token: SyntaxKind, range: SourceMapRange | undefined): T {
     const emitNode = getOrCreateEmitNode(node);
     const tokenSourceMapRanges = emitNode.tokenSourceMapRanges ?? (emitNode.tokenSourceMapRanges = []);
     tokenSourceMapRanges[token] = range;
@@ -135,7 +163,7 @@ export function setTokenSourceMapRange<T extends Node>(node: T, token: SyntaxKin
  *
  * @internal
  */
-export function getStartsOnNewLine(node: Node) {
+export function getStartsOnNewLine(node: Node): boolean | undefined {
     return node.emitNode?.startsOnNewLine;
 }
 
@@ -144,7 +172,7 @@ export function getStartsOnNewLine(node: Node) {
  *
  * @internal
  */
-export function setStartsOnNewLine<T extends Node>(node: T, newLine: boolean) {
+export function setStartsOnNewLine<T extends Node>(node: T, newLine: boolean): T {
     getOrCreateEmitNode(node).startsOnNewLine = newLine;
     return node;
 }
@@ -159,7 +187,7 @@ export function getCommentRange(node: Node): TextRange {
 /**
  * Sets a custom text range to use when emitting comments.
  */
-export function setCommentRange<T extends Node>(node: T, range: TextRange) {
+export function setCommentRange<T extends Node>(node: T, range: TextRange): T {
     getOrCreateEmitNode(node).commentRange = range;
     return node;
 }
@@ -168,12 +196,12 @@ export function getSyntheticLeadingComments(node: Node): SynthesizedComment[] | 
     return node.emitNode?.leadingComments;
 }
 
-export function setSyntheticLeadingComments<T extends Node>(node: T, comments: SynthesizedComment[] | undefined) {
+export function setSyntheticLeadingComments<T extends Node>(node: T, comments: SynthesizedComment[] | undefined): T {
     getOrCreateEmitNode(node).leadingComments = comments;
     return node;
 }
 
-export function addSyntheticLeadingComment<T extends Node>(node: T, kind: SyntaxKind.SingleLineCommentTrivia | SyntaxKind.MultiLineCommentTrivia, text: string, hasTrailingNewLine?: boolean) {
+export function addSyntheticLeadingComment<T extends Node>(node: T, kind: SyntaxKind.SingleLineCommentTrivia | SyntaxKind.MultiLineCommentTrivia, text: string, hasTrailingNewLine?: boolean): T {
     return setSyntheticLeadingComments(node, append<SynthesizedComment>(getSyntheticLeadingComments(node), { kind, pos: -1, end: -1, hasTrailingNewLine, text }));
 }
 
@@ -181,12 +209,12 @@ export function getSyntheticTrailingComments(node: Node): SynthesizedComment[] |
     return node.emitNode?.trailingComments;
 }
 
-export function setSyntheticTrailingComments<T extends Node>(node: T, comments: SynthesizedComment[] | undefined) {
+export function setSyntheticTrailingComments<T extends Node>(node: T, comments: SynthesizedComment[] | undefined): T {
     getOrCreateEmitNode(node).trailingComments = comments;
     return node;
 }
 
-export function addSyntheticTrailingComment<T extends Node>(node: T, kind: SyntaxKind.SingleLineCommentTrivia | SyntaxKind.MultiLineCommentTrivia, text: string, hasTrailingNewLine?: boolean) {
+export function addSyntheticTrailingComment<T extends Node>(node: T, kind: SyntaxKind.SingleLineCommentTrivia | SyntaxKind.MultiLineCommentTrivia, text: string, hasTrailingNewLine?: boolean): T {
     return setSyntheticTrailingComments(node, append<SynthesizedComment>(getSyntheticTrailingComments(node), { kind, pos: -1, end: -1, hasTrailingNewLine, text }));
 }
 
@@ -258,7 +286,7 @@ export function getEmitHelpers(node: Node): EmitHelper[] | undefined {
 /**
  * Moves matching emit helpers from a source node to a target node.
  */
-export function moveEmitHelpers(source: Node, target: Node, predicate: (helper: EmitHelper) => boolean) {
+export function moveEmitHelpers(source: Node, target: Node, predicate: (helper: EmitHelper) => boolean): void {
     const sourceEmitNode = source.emitNode;
     const sourceEmitHelpers = sourceEmitNode && sourceEmitNode.helpers;
     if (!some(sourceEmitHelpers)) return;
@@ -303,7 +331,7 @@ export function setSnippetElement<T extends Node>(node: T, snippet: SnippetEleme
 
 /** @internal */
 export function ignoreSourceNewlines<T extends Node>(node: T): T {
-    getOrCreateEmitNode(node).flags |= EmitFlags.IgnoreSourceNewlines;
+    getOrCreateEmitNode(node).internalFlags |= InternalEmitFlags.IgnoreSourceNewlines;
     return node;
 }
 
@@ -317,4 +345,37 @@ export function setTypeNode<T extends Node>(node: T, type: TypeNode): T {
 /** @internal */
 export function getTypeNode<T extends Node>(node: T): TypeNode | undefined {
     return node.emitNode?.typeNode;
+}
+
+/** @internal */
+export function setIdentifierTypeArguments<T extends Identifier>(node: T, typeArguments: NodeArray<TypeNode | TypeParameterDeclaration> | undefined): T {
+    getOrCreateEmitNode(node).identifierTypeArguments = typeArguments;
+    return node;
+}
+
+/** @internal */
+export function getIdentifierTypeArguments(node: Identifier): NodeArray<TypeNode | TypeParameterDeclaration> | undefined {
+    return node.emitNode?.identifierTypeArguments;
+}
+
+/** @internal */
+export function setIdentifierAutoGenerate<T extends Identifier | PrivateIdentifier>(node: T, autoGenerate: AutoGenerateInfo | undefined): T {
+    getOrCreateEmitNode(node).autoGenerate = autoGenerate;
+    return node;
+}
+
+/** @internal @knipignore */
+export function getIdentifierAutoGenerate(node: Identifier | PrivateIdentifier): AutoGenerateInfo | undefined {
+    return node.emitNode?.autoGenerate;
+}
+
+/** @internal */
+export function setIdentifierGeneratedImportReference<T extends Identifier | PrivateIdentifier>(node: T, value: ImportSpecifier | undefined): T {
+    getOrCreateEmitNode(node).generatedImportReference = value;
+    return node;
+}
+
+/** @internal */
+export function getIdentifierGeneratedImportReference(node: Identifier | PrivateIdentifier): ImportSpecifier | undefined {
+    return node.emitNode?.generatedImportReference;
 }

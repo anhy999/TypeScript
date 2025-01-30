@@ -8,7 +8,7 @@ Issues that ask questions answered in the FAQ will be closed without elaboration
 
 ## 2. Search for Duplicates
 
-[Search the existing issues](https://github.com/Microsoft/TypeScript/search?type=Issues) before logging a new one.
+[Search the existing issues in GitHub](https://github.com/Microsoft/TypeScript/search?type=Issues) or by the query `site:github.com/microsoft/TypeScript <your keywords>` in your favorite search engine before logging a new one. Search engines generally list more relevant and accurate results at the top than the GitHub searching feature.
 
 Some search tips:
  * *Don't* restrict your search to only open issues. An issue with a title similar to yours may have been closed as a duplicate of one with a less-findable title.
@@ -81,10 +81,7 @@ hereby tests             # Build the test infrastructure using the built compile
 hereby runtests          # Run tests using the built compiler and test infrastructure.
                          # You can override the specific suite runner used or specify a test for this command.
                          # Use --tests=<testPath> for a specific test and/or --runner=<runnerName> for a specific suite.
-                         # Valid runners include conformance, compiler, fourslash, project, user, and docker
-                         # The user and docker runners are extended test suite runners - the user runner
-                         # works on disk in the tests/cases/user directory, while the docker runner works in containers.
-                         # You'll need to have the docker executable in your system path for the docker runner to work.
+                         # Valid runners include conformance, compiler, fourslash, and project
 hereby runtests-parallel # Like runtests, but split across multiple threads. Uses a number of threads equal to the system
                          # core count by default. Use --workers=<number> to adjust this.
 hereby baseline-accept   # This replaces the baseline test results with the results obtained from hereby runtests.

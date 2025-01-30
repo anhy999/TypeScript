@@ -1,21 +1,12 @@
-Info 0    [00:00:15.000] Provided types map file "/a/lib/typesMap.json" doesn't exist
-Info 1    [00:00:16.000] request:
-    {
-      "command": "geterr",
-      "arguments": {
-        "delay": 0,
-        "files": [
-          "/a/b/project/file.ts"
-        ]
-      },
-      "seq": 1,
-      "type": "request"
-    }
+Info seq  [hh:mm:ss:mss] currentDirectory:: /home/src/Vscode/Projects/bin useCaseSensitiveFileNames:: false
+Info seq  [hh:mm:ss:mss] libs Location:: /home/src/tslibs/TS/Lib
+Info seq  [hh:mm:ss:mss] globalTypingsCacheLocation:: /home/src/Library/Caches/typescript
+Info seq  [hh:mm:ss:mss] Provided types map file "/home/src/tslibs/TS/Lib/typesMap.json" doesn't exist
 Before request
-//// [/a/b/project/file.ts]
+//// [/home/src/projects/project/a/b/project/file.ts]
 let x: number = false;
 
-//// [/a/lib/lib.d.ts]
+//// [/home/src/tslibs/TS/Lib/lib.d.ts]
 /// <reference no-default-lib="true"/>
 interface Boolean {}
 interface Function {}
@@ -27,40 +18,37 @@ interface Object {}
 interface RegExp {}
 interface String { charAt: any; }
 interface Array<T> { length: number; [n: number]: T; }
+interface ReadonlyArray<T> {}
+declare const console: { log(msg: any): void; };
 
 
-PolledWatches::
-
-FsWatches::
-
-FsWatchesRecursive::
-
+Info seq  [hh:mm:ss:mss] request:
+    {
+      "command": "geterr",
+      "arguments": {
+        "delay": 0,
+        "files": [
+          "/home/src/projects/project/a/b/project/file.ts"
+        ]
+      },
+      "seq": 1,
+      "type": "request"
+    }
 After request
 
-PolledWatches::
+Timeout callback:: count: 1
+1: checkOne *new*
 
-FsWatches::
+Before running Timeout callback:: count: 1
+1: checkOne
 
-FsWatchesRecursive::
-
-Info 2    [00:00:17.000] response:
+Info seq  [hh:mm:ss:mss] event:
     {
-      "responseRequired": false
+      "seq": 0,
+      "type": "event",
+      "event": "requestCompleted",
+      "body": {
+        "request_seq": 1
+      }
     }
-Before checking timeout queue length (1) and running
-
-PolledWatches::
-
-FsWatches::
-
-FsWatchesRecursive::
-
-Info 3    [00:00:18.000] event:
-    {"seq":0,"type":"event","event":"requestCompleted","body":{"request_seq":1}}
-After checking timeout queue length (1) and running
-
-PolledWatches::
-
-FsWatches::
-
-FsWatchesRecursive::
+After running Timeout callback:: count: 0

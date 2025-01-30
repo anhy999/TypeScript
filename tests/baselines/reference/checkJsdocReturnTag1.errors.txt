@@ -1,8 +1,7 @@
-error TS5101: Flag 'out' is deprecated and will stop functioning in TypeScript 5.5. Specify 'ignoreDeprecations: "5.0"' to silence this error.
+returns.js(20,12): error TS2872: This kind of expression is always truthy.
 
 
-!!! error TS5101: Flag 'out' is deprecated and will stop functioning in TypeScript 5.5. Specify 'ignoreDeprecations: "5.0"' to silence this error.
-==== tests/cases/conformance/jsdoc/returns.js (0 errors) ====
+==== returns.js (1 errors) ====
     // @ts-check
     /**
      * @returns {string} This comment is not currently exposed
@@ -23,4 +22,7 @@ error TS5101: Flag 'out' is deprecated and will stop functioning in TypeScript 5
      */
     function f2() {
         return 5 || "hello";
+               ~
+!!! error TS2872: This kind of expression is always truthy.
     }
+    

@@ -1,4 +1,5 @@
 import {
+    BaseType,
     clear,
     EntityNameOrEntityNameExpression,
     forEach,
@@ -9,7 +10,6 @@ import {
     IndexType,
     InterfaceType,
     MappedType,
-    Node,
     ObjectFlags,
     ObjectType,
     ResolvedType,
@@ -24,21 +24,21 @@ import {
     TypeQueryNode,
     TypeReference,
     UnionOrIntersectionType,
-} from "./_namespaces/ts";
+} from "./_namespaces/ts.js";
 
 /** @internal */
 export function createGetSymbolWalker(
     getRestTypeOfSignature: (sig: Signature) => Type,
     getTypePredicateOfSignature: (sig: Signature) => TypePredicate | undefined,
     getReturnTypeOfSignature: (sig: Signature) => Type,
-    getBaseTypes: (type: Type) => Type[],
+    getBaseTypes: (type: InterfaceType) => BaseType[],
     resolveStructuredTypeMembers: (type: ObjectType) => ResolvedType,
     getTypeOfSymbol: (sym: Symbol) => Type,
-    getResolvedSymbol: (node: Node) => Symbol,
+    getResolvedSymbol: (node: Identifier) => Symbol,
     getConstraintOfTypeParameter: (typeParameter: TypeParameter) => Type | undefined,
     getFirstIdentifier: (node: EntityNameOrEntityNameExpression) => Identifier,
-    getTypeArguments: (type: TypeReference) => readonly Type[]) {
-
+    getTypeArguments: (type: TypeReference) => readonly Type[],
+): (accept?: (symbol: Symbol) => boolean) => SymbolWalker {
     return getSymbolWalker;
 
     function getSymbolWalker(accept: (symbol: Symbol) => boolean = () => true): SymbolWalker {
